@@ -318,5 +318,94 @@ kubectl → API Server → etcd → Scheduler → Kubelet → Container Runtime 
 ---
 
 
+Task 3: Install kubectl
+kubectl is the CLI tool you will use to talk to your Kubernetes cluster.
+# Linux (amd64)
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+Verify:
+kubectl version --client
+
+
+Task 4: Set Up Your Local Cluster
+Option A: kind (Kubernetes in Docker)
+# Linux
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+
+# Create a cluster
+kind create cluster --name devops-cluster
+
+# Verify
+kubectl cluster-info
+kubectl get nodes
+
+
+Option B: minikube
+# Start a cluster
+minikube start
+
+# Verify
+kubectl cluster-info
+kubectl get nodes
+
+
+Task 5: Explore Your Cluster
+Now that your cluster is running, explore it:
+
+# See cluster info
+kubectl cluster-info
+
+# List all nodes
+kubectl get nodes
+
+# Get detailed info about your node
+kubectl describe node <node-name>
+
+# List all namespaces
+kubectl get namespaces
+
+# See ALL pods running in the cluster (across all namespaces)
+kubectl get pods -A
+
+
+Task 6: Practice Cluster Lifecycle
+Build muscle memory with cluster operations:
+
+# Delete your cluster
+kind delete cluster --name devops-cluster
+# (or: minikube delete)
+
+# Recreate it
+kind create cluster --name devops-cluster
+# (or: minikube start)
+
+# Verify it is back
+kubectl get nodes
+
+
+Try these useful commands:
+
+# Check which cluster kubectl is connected to
+kubectl config current-context
+
+# List all available contexts (clusters)
+kubectl config get-contexts
+
+# See the full kubeconfig
+kubectl config view
+
+
+What is a kubeconfig? Where is it stored on your machine?
+A kubeconfig is a configuration file used by kubectl to connect to and manage Kubernetes clusters. It contains information about clusters, users (credentials), and contexts (cluster + user + namespace).
+By default, the kubeconfig file is stored at:
+~/.kube/config
+kubectl reads this file to know which cluster to communicate with and which credentials to use when executing Kubernetes commands.
+
+
+
 
 
