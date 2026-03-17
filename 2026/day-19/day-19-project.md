@@ -1,3 +1,13 @@
+cron commands
+
+crontab -l - view cron jobs
+crontan -e - edit crontab
+crontab -r - remove all cron jobs
+crontab -u username -e (edit another users cron (only root can do this))
+
+
+
+
 #Backup & Rotation 
 
 #!/bin/bash
