@@ -32,5 +32,8 @@ Branching commands
 3) git chekout <name> or git switch <name> : switch branch
 4) git checkout -b <name> or git switch -c <name> : create and switch branch
 5) git branch -d <name> : delete a branch
+6) git branch -M main : renames the current branch to main
+7) git remote -v :shows the remote repositories linked to your local Git repository along with their URLs for fetching and pushing.
+8) git push -u origin main : git push → Uploads local commits to a remote repository, -u (or --set-upstream) → Links the local branch to the remote branch origin → Name of the remote repository, main → Name of the branch being pushed
 
 
