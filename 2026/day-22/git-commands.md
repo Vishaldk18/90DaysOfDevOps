@@ -25,3 +25,12 @@ Viewing changes
 1) git status - you can use this command to check the status like file is tracked or not
 2) git log - to see logs, commit hash
 
+Branching commands
+
+1) git branch : view all local brances -a: local + remote -r: remote only
+2) git branch <name> : create new branch
+3) git chekout <name> or git switch <name> : switch branch
+4) git checkout -b <name> or git switch -c <name> : create and switch branch
+5) git branch -d <name> : delete a branch
+
+
