@@ -114,6 +114,3 @@ kubectl delete -f file.yaml
 ```bash
 --dry-run=client -o yaml
 ```
-
-```
-```
