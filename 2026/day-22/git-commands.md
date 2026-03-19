@@ -35,5 +35,10 @@ Branching commands
 6) git branch -M main : renames the current branch to main
 7) git remote -v :shows the remote repositories linked to your local Git repository along with their URLs for fetching and pushing.
 8) git push -u origin main : git push → Uploads local commits to a remote repository, -u (or --set-upstream) → Links the local branch to the remote branch origin → Name of the remote repository, main → Name of the branch being pushed
+9) git remote add upstream <original-repo-url>
+10) git fetch upstream
+11) git merge upstream/main
+12) git push origin main
+
 
 
