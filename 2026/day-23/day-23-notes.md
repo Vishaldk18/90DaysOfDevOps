@@ -55,4 +55,43 @@ Your laptop (local)
 
 
 
+Difference between git fetch and git pull (simple explanation)
+
+
+git fetch
+Downloads the latest changes from the remote repository but does NOT merge them into your current branch.
+Your code stays unchanged until you decide to merge.
+
+
+git pull
+Downloads the latest changes and immediately merges them into your current branch.
+
+
+
+ Difference between clone and fork
+Clone:
+Clone creates a local copy of a repository on your computer. It is used when you have access to the repository and want to work on it locally.
+Fork:
+Fork creates a copy of a repository on your GitHub account. It is used when you do not have write access to the original repository.
+
+When would you clone vs fork?
+Use clone when:
+
+You are working on your own repository
+You are part of the same team
+You have push access to the repository
+
+Use fork when:
+
+You want to contribute to someone else’s repository
+You do not have write access
+You are contributing to open‑source projects
+
+
+After forking, how do you keep your fork in sync with the original repo?
+Answer:
+Add the original repository as an upstream remote, fetch the latest changes from it, merge those changes into your branch, and push the updates to your fork.
+
+
+
 
