@@ -1,4 +1,3 @@
-````markdown
 # 🚀 Kubernetes Day 51 – Commands Cheat Sheet
 
 ## Apply / Create Resources
