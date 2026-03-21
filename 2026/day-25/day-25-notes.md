@@ -291,3 +291,90 @@ main ← small frequent commits
 
 ---
 
+---
+
+# Git Reflog
+
+git reflog shows all HEAD movements and helps recover lost commits.
+
+---
+
+---
+
+# 🔍 Git Reflog Example (Recover Lost Commit)
+
+## 🧠 Scenario
+
+You accidentally deleted a commit using:
+
+```bash
+git reset --hard HEAD~1
+```
+
+👉 Now your last commit is gone 😬
+
+---
+
+## 🔹 Step 1: Check reflog
+
+```bash
+git reflog
+```
+
+👉 Output (example):
+
+```bash
+a387975 HEAD@{0}: reset: moving to HEAD~1
+d83cf3f HEAD@{1}: commit: fixed formatting
+f793a2a HEAD@{2}: commit: fixed errors
+```
+
+---
+
+## 🔹 Step 2: Identify lost commit
+
+👉 Your lost commit is:
+
+```
+d83cf3f (HEAD@{1})
+```
+
+---
+
+## 🔹 Step 3: Recover it
+
+```bash
+git reset --hard d83cf3f
+```
+
+👉 OR using position:
+
+```bash
+git reset --hard HEAD@{1}
+```
+
+---
+
+## ✅ Result
+
+* Your deleted commit is restored 🎉
+* Project goes back to previous state
+
+---
+
+# 🎯 One-line
+
+👉 “git reflog shows all HEAD movements and helps recover lost commits.”
+
+---
+
+# 🔥 Pro Tip
+
+Even after:
+
+* `git reset --hard`
+* `git commit --amend`
+
+👉 You can still recover using `reflog`
+
+---
