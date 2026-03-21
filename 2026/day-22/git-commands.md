@@ -430,6 +430,118 @@ git checkout <branch>
 * `git cherry-pick` → copy specific commit
 
 
+# 🔄 Git Reset, Revert & Reflog Commands
 
+---
 
+# 🔁 Git Reset
 
+## 🔹 Soft Reset (keep staging + files)
+```bash
+git reset --soft <commit-id>
+````
+
+## 🔹 Mixed Reset (default: unstage changes, keep files)
+
+```bash
+git reset --mixed <commit-id>
+# or
+git reset <commit-id>
+```
+
+## 🔹 Hard Reset (delete everything ⚠️)
+
+```bash
+git reset --hard <commit-id>
+```
+
+## 🔹 Reset using relative reference
+
+```bash
+git reset --soft HEAD~1
+git reset --hard HEAD~2
+```
+
+---
+
+# 🔁 Git Revert
+
+## 🔹 Revert last commit
+
+```bash
+git revert HEAD
+```
+
+## 🔹 Revert specific commit
+
+```bash
+git revert <commit-id>
+```
+
+## 🔹 Revert multiple commits
+
+```bash
+git revert <commit1> <commit2>
+```
+
+## 🔹 Revert range
+
+```bash
+git revert HEAD~2..HEAD
+```
+
+## 🔹 Revert without auto commit
+
+```bash
+git revert -n <commit-id>
+```
+
+## 🔹 Continue after conflict
+
+```bash
+git revert --continue
+```
+
+## 🔹 Abort revert
+
+```bash
+git revert --abort
+```
+
+---
+
+# 🔍 Git Reflog (Recovery Tool)
+
+## 🔹 View reflog
+
+```bash
+git reflog
+```
+
+👉 Shows history of HEAD movements (even deleted commits)
+
+---
+
+## 🔹 Recover lost commit
+
+```bash
+git reset --hard <reflog-commit-id>
+```
+
+---
+
+## 🔹 Recover using HEAD position
+
+```bash
+git reset --hard HEAD@{1}
+```
+
+---
+
+# 🎯 Quick Summary
+
+* `git reset` → rewrite history (use locally)
+* `git revert` → safe undo (creates new commit)
+* `git reflog` → recover lost commits
+
+---
