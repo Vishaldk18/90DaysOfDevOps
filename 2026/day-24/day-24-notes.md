@@ -231,6 +231,121 @@ Rebase: Unsafe for shared branches ❌
 
 👉 “Yes, we can merge shared branches because merge preserves history and doesn’t rewrite commits, making it safe for collaboration.”
 
+✅ What does rebase actually do to your commits?
+
+Rebase takes your commits and replays them on top of another branch.
+
+👉 It creates new commits (new IDs) with the same changes.
+
+Simple:
+“Rebase moves my commits to the latest base and rewrites them.”
+
+✅ How is the history different from a merge?
+Rebase: creates a linear, straight history (no extra merge commit)
+Merge: creates a merge commit, history looks like branches joining
+
+Simple:
+“Rebase = clean line, Merge = branch history preserved”
+
+✅ Why should you never rebase shared commits?
+
+Because rebase changes commit history (IDs).
+
+👉 If others already pulled those commits:
+
+Their history won’t match
+Causes conflicts and confusion
+
+Simple:
+“Rebasing shared commits breaks other developers’ history.”
+
+✅ When would you use rebase vs merge?
+
+👉 Use Rebase when:
+
+Working on your local feature branch
+Want clean, linear history
+
+👉 Use Merge when:
+
+Working with team/shared branches
+Want to preserve full history safely
+🎯 Super Short Version (perfect for interviews)
+Rebase → rewrites commits, makes history linear
+Merge → adds a commit, keeps history as is
+Never rebase shared commits → breaks team workflow
+Use rebase locally, merge in team branches
+
+
+✅ What does squash merging do?
+
+Squash merge combines all commits from a branch into a single commit before merging.
+
+👉 Simple:
+“Multiple commits become one clean commit.”
+
+📊 Example
+
+Before:
+
+feature: A---B---C
+
+After squash merge:
+
+main:    ---D   (A+B+C combined)
+✅ When would you use squash merge vs regular merge?
+
+👉 Use Squash Merge when:
+
+You have many small/dirty commits
+Want clean and readable history
+
+👉 Use Regular Merge when:
+
+You want to keep all commits and full history
+Important for debugging or tracking changes
+⚠️ What is the trade-off of squashing?
+
+👉 You lose commit history details
+
+Can’t see individual steps (A, B, C)
+Harder to debug specific changes
+
+👉 Simple:
+“Cleaner history, but less detailed history.”
+
+🎯 One-liner answers
+Squash merge → combine all commits into one
+Use it for clean history
+Trade-off → lose detailed commit history
+
+
+👉 After git merge --squash, you must run git commit manually every time
+
+🧠 Why?
+
+Because:
+
+git merge --squash → only applies + stages changes
+It does NOT create a commit
+
+👉 Git is basically saying:
+“Here are all the combined changes… now you decide the commit message.”
+
+📌 Your flow should be:
+git checkout master
+git merge --squash feature-branch
+git commit -m "combined changes from feature-branch"
+🔥 Important Difference
+Command	Auto commit?
+git merge	✅ Yes
+git merge --squash	❌ No
+🎯 One-line answer
+
+👉 “Yes, squash merge requires a manual commit because it only stages combined changes, it doesn’t create the commit automatically.”
+
+
+
 
 
 
