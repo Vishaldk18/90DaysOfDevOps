@@ -1,6 +1,4 @@
-# Git Merge
-
-## 🚀 Fast-Forward Merge vs Merge Commit
+# 🚀 Git Merge
 
 ## 🟢 1. Fast-Forward Merge
 
@@ -12,7 +10,6 @@ A fast-forward merge happens when there is **no divergence** between branches.
 - Git can just **move the pointer forward**
 
 ### 📊 Example:
-
 ```
 
 main:    A---B
@@ -21,7 +18,6 @@ feature:      C---D
 ```
 
 ### ✅ After merge:
-
 ```
 
 main:    A---B---C---D
@@ -93,259 +89,430 @@ main:    A---B---E
 
 ---
 
-✅ What is a Fast-Forward Merge?
+## ❓ Important Questions
+
+### ✅ What is a Fast-Forward Merge?
 
 A fast-forward merge happens when the target branch has no new commits, so Git simply moves the branch pointer forward to include the new commits.
 
 👉 In short: No new commit is created, history stays linear.
 
-✅ When does Git create a Merge Commit instead?
+---
+
+### ✅ When does Git create a Merge Commit instead?
 
 Git creates a merge commit when both branches have new commits (they diverged) and cannot be fast-forwarded.
 
 👉 In short: Git creates a new commit to combine both histories.
 
-✅ What is a Merge Conflict?
+---
+
+### ✅ What is a Merge Conflict?
 
 A merge conflict happens when Git cannot automatically merge changes, usually because the same file/line was modified in both branches.
 
 👉 In short: Git needs manual input to decide which change to keep.
 
-## Git Rebase
-✅ What is Git Rebase?
+---
+
+# 🔁 Git Rebase
+
+### ✅ What is Git Rebase?
 
 Git rebase means taking your commits and placing them on top of another branch.
 
 👉 In simple words:
 “Rebase moves your work to the latest version of the branch.”
 
-🎯 One-line answer:
+---
+
+### 🎯 One-line answer:
 
 👉 Git rebase re-applies your commits on top of another branch to keep history clean and linear.
 
+---
 
-✅ Scenario
+## 📊 Scenario
 
 You are working on a feature branch, and main has new updates.
 
-📊 Before Rebase
+### 📊 Before Rebase
+
+```
 main:    A---B---C
 feature:      D---E
+```
 
 👉 Your branch is behind main
 
-💡 Run Rebase
+---
+
+### 💡 Run Rebase
+
+```bash
 git checkout feature
 git rebase main
-📊 After Rebase
+```
+
+---
+
+### 📊 After Rebase
+
+```
 main:    A---B---C
 feature:          D'---E'
+```
 
 👉 Your commits (D, E) are moved on top of latest main (C)
 👉 History becomes straight line
 
-🧠 Simple Understanding
-Before: Your work is based on old code
-After: Your work is based on latest code
-🎯 One-line (with example)
+---
+
+### 🧠 Simple Understanding
+
+* Before: Your work is based on old code
+* After: Your work is based on latest code
+
+---
+
+### 🎯 One-line (with example)
 
 👉 “Git rebase moves my feature branch commits on top of latest main, so history stays clean and updated.”
 
+---
 
-✅ Should we rebase main?
+## ❗ Should we rebase main?
 
 👉 Short answer:
 Yes — you should NOT rebase main (or any shared branch).
 
-❌ Why not?
+---
+
+### ❌ Why not?
 
 Because rebase rewrites history.
 
 👉 When you rebase:
 
-Old commits are replaced with new commit IDs
-History changes
-⚠️ Problem in real teams
+* Old commits are replaced with new commit IDs
+* History changes
+
+---
+
+### ⚠️ Problem in real teams
 
 If others are using main and you rebase it:
 
-Their local history ≠ your rewritten history
-They will face:
-conflicts
-duplicate commits
-broken pulls
+* Their local history ≠ your rewritten history
+* They will face:
+
+  * conflicts
+  * duplicate commits
+  * broken pulls
 
 👉 Basically: you mess up the team’s history
 
-🧠 Simple Example
+---
+
+### 🧠 Simple Example
 
 Before:
 
+```
 main: A---B---C
+```
 
 After rebase:
 
+```
 main: A---B---C'
+```
 
 👉 Now others still have C, but repo has C' → mismatch 😬
 
-✅ Rule to remember
-✔ Rebase → only your local/feature branch
-❌ Never rebase → shared branches (main, develop)
-🎯 Interview One-liner
+---
+
+### ✅ Rule to remember
+
+* ✔ Rebase → only your local/feature branch
+* ❌ Never rebase → shared branches (main, develop)
+
+---
+
+### 🎯 Interview One-liner
 
 👉 “We don’t rebase main because rebase rewrites history, which can break collaboration for other developers.”
 
-✅ Can we merge shared branches?
+---
+
+## ✅ Can we merge shared branches?
 
 👉 Yes — merging shared branches is safe and recommended.
 
-🧠 Why merge is safe?
+---
 
-Because merge does NOT rewrite history
+### 🧠 Why merge is safe?
+
+Because merge does NOT rewrite history.
 
 👉 It:
 
-Keeps all existing commits unchanged
-Just adds a new merge commit
-Preserves full history
-📊 Simple idea
+* Keeps all existing commits unchanged
+* Just adds a new merge commit
+* Preserves full history
+
+---
+
+### 📊 Example
+
+```
 main:    A---B---C
 feature:      D---E
+```
 
 After merge:
 
+```
 main:    A---B---C
               \   \
                D---E
                     \
                      M
+```
 
 👉 No commits are changed
 👉 Just a new commit M is added
 
-🔥 Key Difference
-Merge: Safe for shared branches ✅
-Rebase: Unsafe for shared branches ❌
-🎯 Interview One-liner
+---
+
+### 🔥 Key Difference
+
+* Merge: Safe for shared branches ✅
+* Rebase: Unsafe for shared branches ❌
+
+---
+
+### 🎯 Interview One-liner
 
 👉 “Yes, we can merge shared branches because merge preserves history and doesn’t rewrite commits, making it safe for collaboration.”
 
-✅ What does rebase actually do to your commits?
+---
+
+## ❓ Rebase Deep Questions
+
+### ✅ What does rebase actually do to your commits?
 
 Rebase takes your commits and replays them on top of another branch.
 
 👉 It creates new commits (new IDs) with the same changes.
 
-Simple:
-“Rebase moves my commits to the latest base and rewrites them.”
+---
 
-✅ How is the history different from a merge?
-Rebase: creates a linear, straight history (no extra merge commit)
-Merge: creates a merge commit, history looks like branches joining
+### ✅ How is the history different from a merge?
 
-Simple:
-“Rebase = clean line, Merge = branch history preserved”
+* Rebase: linear history
+* Merge: branch history preserved
 
-✅ Why should you never rebase shared commits?
+---
 
-Because rebase changes commit history (IDs).
+### ✅ Why should you never rebase shared commits?
 
-👉 If others already pulled those commits:
+Because rebase changes commit history (IDs), causing conflicts and confusion for others.
 
-Their history won’t match
-Causes conflicts and confusion
+---
 
-Simple:
-“Rebasing shared commits breaks other developers’ history.”
-
-✅ When would you use rebase vs merge?
+### ✅ When would you use rebase vs merge?
 
 👉 Use Rebase when:
 
-Working on your local feature branch
-Want clean, linear history
+* Working on your local feature branch
+* Want clean, linear history
 
 👉 Use Merge when:
 
-Working with team/shared branches
-Want to preserve full history safely
-🎯 Super Short Version (perfect for interviews)
-Rebase → rewrites commits, makes history linear
-Merge → adds a commit, keeps history as is
-Never rebase shared commits → breaks team workflow
-Use rebase locally, merge in team branches
+* Working with team/shared branches
+* Want to preserve history safely
 
+---
 
-✅ What does squash merging do?
+### 🎯 Super Short Version
+
+* Rebase → rewrites commits
+* Merge → preserves commits
+* Never rebase shared commits
+
+---
+
+# 🔀 Squash Merge
+
+### ✅ What does squash merging do?
 
 Squash merge combines all commits from a branch into a single commit before merging.
 
-👉 Simple:
-“Multiple commits become one clean commit.”
+👉 “Multiple commits become one clean commit.”
 
-📊 Example
+---
+
+### 📊 Example
 
 Before:
 
+```
 feature: A---B---C
+```
 
-After squash merge:
+After:
 
-main:    ---D   (A+B+C combined)
-✅ When would you use squash merge vs regular merge?
+```
+main: ---D   (A+B+C combined)
+```
 
-👉 Use Squash Merge when:
+---
 
-You have many small/dirty commits
-Want clean and readable history
+### ✅ When to use squash merge?
 
-👉 Use Regular Merge when:
+👉 Use when:
 
-You want to keep all commits and full history
-Important for debugging or tracking changes
-⚠️ What is the trade-off of squashing?
+* Many small commits
+* Want clean history
 
-👉 You lose commit history details
+👉 Use regular merge when:
 
-Can’t see individual steps (A, B, C)
-Harder to debug specific changes
+* You want full commit history
 
-👉 Simple:
-“Cleaner history, but less detailed history.”
+---
 
-🎯 One-liner answers
-Squash merge → combine all commits into one
-Use it for clean history
-Trade-off → lose detailed commit history
+### ⚠️ Trade-off
 
+* Lose detailed commit history
+* Harder debugging
 
-👉 After git merge --squash, you must run git commit manually every time
+---
 
-🧠 Why?
+### 🎯 One-liners
 
-Because:
+* Squash → one commit
+* Trade-off → lose history
 
-git merge --squash → only applies + stages changes
-It does NOT create a commit
+---
 
-👉 Git is basically saying:
-“Here are all the combined changes… now you decide the commit message.”
+## ❗ Important
 
-📌 Your flow should be:
+👉 After `git merge --squash`, you must run commit manually
+
+```bash
 git checkout master
 git merge --squash feature-branch
 git commit -m "combined changes from feature-branch"
-🔥 Important Difference
-Command	Auto commit?
-git merge	✅ Yes
-git merge --squash	❌ No
-🎯 One-line answer
+```
 
-👉 “Yes, squash merge requires a manual commit because it only stages combined changes, it doesn’t create the commit automatically.”
+---
 
+### 🔥 Difference
 
+| Command            | Auto Commit |
+| ------------------ | ----------- |
+| git merge          | ✅ Yes       |
+| git merge --squash | ❌ No        |
 
+---
 
+### 🎯 One-line
 
+👉 “Squash merge stages changes but requires manual commit.”
+
+---
+
+# 📦 Git Stash
+
+### ✅ Difference between stash apply and pop
+
+* `git stash apply` → apply + keep stash
+* `git stash pop` → apply + delete stash
+
+---
+
+### 🎯 One-line
+
+👉 apply = keep
+👉 pop = delete
+
+---
+
+### ✅ Real-world use cases
+
+#### 1. Switch branches quickly
+
+```bash
+git stash
+git checkout main
+```
+
+#### 2. Pull safely
+
+```bash
+git stash
+git pull
+git stash pop
+```
+
+#### 3. Save incomplete work
+
+* Avoid messy commits
+
+---
+
+### 🎯 One-line
+
+👉 “Stash saves temporary work without committing.”
+
+---
+
+# 🍒 Git Cherry-Pick
+
+### ✅ What does cherry-pick do?
+
+Copies a specific commit from one branch to another.
+
+---
+
+### 📊 Example
+
+```
+feature: A---B---C
+main:    A---D
+```
+
+After:
+
+```
+main:    A---D---C'
+```
+
+---
+
+### ✅ Use cases
+
+* Hotfix
+* Selective changes
+* Backporting
+
+---
+
+### ⚠️ Risks
+
+* Duplicate commits
+* Merge conflicts
+* Missing dependencies
+
+---
+
+### 🎯 One-line
+
+👉 Cherry-pick → copy one commit
+👉 Risk → conflicts & duplicates
+
+---
+
+```
 
