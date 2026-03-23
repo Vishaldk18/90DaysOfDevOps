@@ -10,3 +10,6 @@ gh pr merge supports merge commit, squash, and rebase strategies. Choice depends
 
 How would you review someone else's PR using gh?
 To review a PR using GitHub CLI, I list PRs, inspect details with gh pr view, check out the branch locally, review changes using gh pr diff, and then approve or request changes using gh pr review. This allows full review without using the UI.
+
+How could gh run and gh workflow be useful in a CI/CD pipeline?
+gh run and gh workflow are useful in CI/CD pipelines because they allow triggering, monitoring, and debugging workflows directly from the command line. This enables automation through scripts, integration with other tools, and faster incident handling without relying on the GitHub UI.”
