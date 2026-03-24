@@ -1,5 +1,3 @@
----
-
 # Kubernetes Notes
 
 ## Why was Kubernetes created? What problem does it solve that Docker alone cannot?
