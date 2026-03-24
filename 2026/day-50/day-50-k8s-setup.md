@@ -1,54 +1,129 @@
-Task 1
+---
 
-Why was Kubernetes created? What problem does it solve that Docker alone cannot?
-kuberentes was created by google, to manage there applications and increasing load on the servers, k8s solves the problem related to scaling and healing
-with k8s you can auto scale & auto heal
+# Kubernetes Notes
 
-Who created Kubernetes and what was it inspired by?
-Kubernetes was created by Google engineers Joe Beda, Brendan Burns, and Craig McLuckie in 2014 to manage and orchestrate containers at scale. It was inspired by Google’s internal cluster management systems Borg and later Omega, which were used to run containers across thousands of machines.
-Kubernetes adopted key concepts from Borg such as cluster management, container scheduling, self-healing, declarative configuration, and auto-scaling. Google later open-sourced Kubernetes and donated it to the Cloud Native Computing Foundation (CNCF) in 2015, where it is now maintained by the community.
+## Why was Kubernetes created? What problem does it solve that Docker alone cannot?
 
+Kubernetes was created by Google to manage their applications and increasing load on the servers.
 
-What does the name "Kubernetes" mean?
-Kubernetes comes from a Greek word meaning “helmsman” or “pilot,” representing a system that steers and manages containerized applications.
+Kubernetes solves problems related to **scaling and healing**.
 
+With Kubernetes you can:
 
-Task 2
-Draw the Kubernetes Architecture
-From memory, draw or describe the Kubernetes architecture. Your diagram should include:
+* Auto scale
+* Auto heal
 
-kubectl: kubectl is a command-line tool used to interact with the Kubernetes API server
-to manage cluster resources such as pods, deployments, services, and ingress.
+---
 
-Master node/control plane
-API Server: the front door to the cluster, every command goes through it. It receives
-requests from kubectl and other components and coordinates communication
-between cluster components. 
-scheduler: The Scheduler watches for newly created pods that do not have a node assigned
-and decides which worker node the pod should run on based on available resources.
-etcd: etcd is a distributed key-value database that stores the entire state of
-the Kubernetes cluster including configuration, secrets, and cluster data.
-controller manager: ontinuously monitor the cluster
-state and ensure the desired state matches the actual state.
+## Who created Kubernetes and what was it inspired by?
 
-Worker node
-kubelet: kubelet is an agent that runs on every worker node. It communicates with the
-API server and ensures containers in the pods are running and healthy.
-service-proxy/kube-proxy : handles networking rules so pods can communicate, kube-proxy manages networking rules on worker nodes and enables communication
-between services and pods inside the cluster.
-Container Runtime: the engine that actually runs containers (containerd, CRI-O), Container Runtime is the software responsible for running containers
-on worker nodes (example: containerd, CRI-O).
+Kubernetes was created by Google engineers **Joe Beda, Brendan Burns, and Craig McLuckie in 2014** to manage and orchestrate containers at scale.
 
-cni: CNI (Container Network Interface) provides networking for Kubernetes pods
-and allows communication between pods across different nodes in the cluster.
+It was inspired by Google’s internal cluster management systems **Borg and later Omega**, which were used to run containers across thousands of machines.
 
+Kubernetes adopted key concepts from Borg such as:
 
+* Cluster management
+* Container scheduling
+* Self-healing
+* Declarative configuration
+* Auto-scaling
 
+Google later open-sourced Kubernetes and donated it to the **Cloud Native Computing Foundation (CNCF) in 2015**, where it is now maintained by the community.
 
+---
 
+## What does the name "Kubernetes" mean?
 
-These are **very common Kubernetes interview questions**. I'll explain them step-by-step in a **clear flow so you can remember the architecture**.
+Kubernetes comes from a Greek word meaning **“helmsman” or “pilot”**, representing a system that steers and manages containerized applications.
 
+---
+
+# Kubernetes Architecture
+
+## kubectl
+
+`kubectl` is a command-line tool used to interact with the Kubernetes API server to manage cluster resources such as:
+
+* Pods
+* Deployments
+* Services
+* Ingress
+
+---
+
+## Master Node / Control Plane
+
+### API Server
+
+* The front door to the cluster
+* Every command goes through it
+* Receives requests from kubectl and other components
+* Coordinates communication between cluster components
+
+---
+
+### Scheduler
+
+* Watches for newly created pods without a node assigned
+* Decides which worker node the pod should run on
+* Uses available resources for decision making
+
+---
+
+### etcd
+
+* Distributed key-value database
+* Stores entire cluster state including:
+
+  * Configuration
+  * Secrets
+  * Cluster data
+
+---
+
+### Controller Manager
+
+* Continuously monitors the cluster state
+* Ensures desired state matches actual state
+
+---
+
+## Worker Node
+
+### kubelet
+
+* Agent running on every worker node
+* Communicates with API server
+* Ensures containers in pods are running and healthy
+
+---
+
+### kube-proxy (Service Proxy)
+
+* Handles networking rules
+* Enables communication between services and pods
+* Manages networking rules on worker nodes
+
+---
+
+### Container Runtime
+
+* Engine that runs containers
+* Examples:
+
+  * containerd
+  * CRI-O
+* Responsible for running containers on worker nodes
+
+---
+
+### CNI (Container Network Interface)
+
+* Provides networking for Kubernetes pods
+* Enables communication between pods across nodes
+
+---
 ---
 
 # 1️⃣ What happens when you run `kubectl apply -f pod.yaml`?
@@ -123,7 +198,6 @@ The **kubelet on the selected node sees the pod assignment** from the API Server
 
 Then it:
 
-* Pulls container image
 * Talks to **container runtime**
 
 Example:
