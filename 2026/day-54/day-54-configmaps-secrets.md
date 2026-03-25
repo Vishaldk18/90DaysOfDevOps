@@ -14,7 +14,7 @@ kubectl create configmap app-config \
 
 ## Task 2: Create ConfigMap from File
 
-### nginx.conf
+### default.conf
 
 ```nginx
 server {
@@ -35,7 +35,7 @@ server {
 
 ```bash
 kubectl create configmap nginx-config \
-  --from-file=default.conf=nginx.conf
+  --from-file=default.conf=default.conf
 ```
 
 ---
