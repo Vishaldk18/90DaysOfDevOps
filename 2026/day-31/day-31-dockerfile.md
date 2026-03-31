@@ -1,13 +1,23 @@
-Task 1: Your First Dockerfile
+---
+# Task 1: Your First Dockerfile
+
+```dockerfile
 FROM ubuntu
 
 RUN apt-get update && apt-get install -y curl
 
 CMD ["echo", "Hello from my custom image!"]
+````
 
+```bash
 docker run my-ubuntu:v1
+```
 
-Task 2: Dockerfile Instructions
+---
+
+# Task 2: Dockerfile Instructions
+
+```dockerfile
 FROM python:3.14
 
 WORKDIR /app
@@ -19,21 +29,25 @@ RUN pip install -r requirements.txt
 EXPOSE 8000
 
 CMD ["python", "main.py"]
+```
 
+---
 
 ## 🔹 FROM — Base Image
 
 The `FROM` instruction specifies the base image on which the Docker image is built. It is always the first instruction in a Dockerfile and defines the starting environment for the container.
 
 A base image can be:
-- A minimal OS (e.g., alpine, ubuntu)
-- A runtime image (e.g., python, node)
-- A custom image
+
+* A minimal OS (e.g., alpine, ubuntu)
+* A runtime image (e.g., python, node)
+* A custom image
 
 Example:
+
 ```dockerfile
 FROM ubuntu
-````
+```
 
 You can also specify a version (tag):
 
@@ -63,7 +77,7 @@ Key Points:
 
 * Each `RUN` creates a new layer
 * Commands are executed at build time, not runtime
-* Multiple commands should be combined using `&&` to reduce layers
+* Combine commands using `&&` to reduce layers
 
 Example (optimized):
 
@@ -132,7 +146,7 @@ Key Points:
 
 * Automatically creates the directory if it does not exist
 * Avoids using `cd` repeatedly
-* Improves readability and structure
+* Improves readability
 
 Equivalent to:
 
@@ -160,11 +174,11 @@ EXPOSE 8000
 
 Key Points:
 
-* It does NOT publish the port
-* It acts as documentation for users and tools
-* Used by Docker networking and orchestration tools
+* Does NOT publish the port
+* Acts as documentation
+* Used by Docker networking tools
 
-To actually expose the port externally:
+To expose externally:
 
 ```bash
 docker run -p 8000:8000 image_name
@@ -173,8 +187,8 @@ docker run -p 8000:8000 image_name
 Purpose:
 
 * Document application port
-* Improve clarity for developers
-* Assist container orchestration tools
+* Improve clarity
+* Assist orchestration tools
 
 ---
 
@@ -190,11 +204,11 @@ CMD ["python", "app.py"]
 
 Key Points:
 
-* Only one CMD is allowed (last one overrides previous)
+* Only one CMD is used (last one wins)
 * Can be overridden at runtime
-* Should be written in JSON array format (exec form)
+* Prefer JSON (exec form)
 
-Shell form example:
+Shell form:
 
 ```dockerfile
 CMD python app.py
@@ -208,20 +222,20 @@ CMD ["python", "app.py"]
 
 Purpose:
 
-* Define container startup behavior
-* Specify the main application process
-* Provide default execution logic
+* Define startup behavior
+* Specify main process
+* Provide default execution
 
 ---
 
 ## 🧠 Summary
 
-* FROM → Defines base image
-* RUN → Executes commands during build
-* COPY → Adds files to the image
-* WORKDIR → Sets working directory
-* EXPOSE → Documents the port
-* CMD → Defines default runtime command
+* FROM → Base image
+* RUN → Build-time commands
+* COPY → Add files
+* WORKDIR → Set directory
+* EXPOSE → Document port
+* CMD → Default command
 
 ---
 
@@ -241,95 +255,97 @@ EXPOSE 8000
 CMD ["python", "app.py"]
 ```
 
-This example:
-
-* Uses Python base image
-* Sets working directory
-* Copies application code
-* Installs dependencies
-* Documents port
-* Runs the application
-
 ---
-```
 
+# Task 3: CMD vs ENTRYPOINT
 
-Task 3: CMD vs ENTRYPOINT
-
+```dockerfile
 FROM alpine
 
 CMD ["echo", "Hello"]
+```
 
+```bash
 docker run demo1
-
 docker run demo1 echo test
+```
 
+```dockerfile
 FROM alpine
 
 ENTRYPOINT ["echo"]
+```
 
+```bash
 docker run demo2
-
 docker run demo2 test
+```
 
+👉 CMD:
 
-CMD is used to provide a default command that can be overridden at runtime, while ENTRYPOINT is used to define a fixed command that always runs, with any additional arguments appended to it. In practice, ENTRYPOINT is used for fixed executables and CMD for default arguments.
+* Default command
+* Can be overridden
 
-Task 4: Build a Simple Web App Image
-index.html
+👉 ENTRYPOINT:
+
+* Fixed command
+* Arguments are appended
+
+---
+
+# Task 4: Build a Simple Web App Image
+
+## index.html
+
+```html
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My First Docker App</title>
 
-```
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f6f8;
-        text-align: center;
-        padding: 50px;
-    }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            text-align: center;
+            padding: 50px;
+        }
 
-    h1 {
-        color: #2c3e50;
-    }
+        h1 {
+            color: #2c3e50;
+        }
 
-    p {
-        color: #555;
-        font-size: 18px;
-    }
+        p {
+            color: #555;
+            font-size: 18px;
+        }
 
-    .container {
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        display: inline-block;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
-    button {
-        padding: 10px 20px;
-        border: none;
-        background-color: #3498db;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    button:hover {
-        background-color: #2980b9;
-    }
-</style>
-```
-
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
 
-```
 <div class="container">
     <h1>🚀 Hello from Docker!</h1>
     <p>This is my first containerized HTML app.</p>
@@ -342,18 +358,70 @@ index.html
         alert("🎉 Your Docker app is working!");
     }
 </script>
-```
 
 </body>
 </html>
+```
 
+---
 
+## Dockerfile
+
+```dockerfile
 FROM nginx:alpine
 
 COPY index.html /usr/share/nginx/html/index.html
+```
+
+```bash
 docker build -t web-app3 .
 docker run -d -p 8080:80 web-app3
+```
 
+---
 
+# Task 5 & 6
 
+## ❌ Unoptimized Dockerfile
 
+```dockerfile
+FROM node:12.2.0-alpine
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 8000
+
+CMD ["node", "app.js"]
+```
+
+---
+
+## ✅ Optimized Dockerfile
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy only package files first (better caching)
+COPY package*.json ./
+
+RUN npm install
+
+# Copy rest of the app
+COPY . .
+
+EXPOSE 8000
+
+CMD ["node", "app.js"]
+```
+
+---
+
+## 🧠 Explanation
+
+We copy `package.json` separately to leverage Docker layer caching. Since dependencies change less frequently than application code, this prevents unnecessary reinstallation of dependencies and speeds up the build process.
