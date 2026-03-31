@@ -274,3 +274,86 @@ docker run demo2 test
 
 
 CMD is used to provide a default command that can be overridden at runtime, while ENTRYPOINT is used to define a fixed command that always runs, with any additional arguments appended to it. In practice, ENTRYPOINT is used for fixed executables and CMD for default arguments.
+
+Task 4: Build a Simple Web App Image
+index.html
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Docker App</title>
+
+```
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        text-align: center;
+        padding: 50px;
+    }
+
+    h1 {
+        color: #2c3e50;
+    }
+
+    p {
+        color: #555;
+        font-size: 18px;
+    }
+
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #3498db;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #2980b9;
+    }
+</style>
+```
+
+</head>
+<body>
+
+```
+<div class="container">
+    <h1>🚀 Hello from Docker!</h1>
+    <p>This is my first containerized HTML app.</p>
+
+    <button onclick="showMessage()">Click Me</button>
+</div>
+
+<script>
+    function showMessage() {
+        alert("🎉 Your Docker app is working!");
+    }
+</script>
+```
+
+</body>
+</html>
+
+
+FROM nginx:alpine
+
+COPY index.html /usr/share/nginx/html/index.html
+docker build -t web-app3 .
+docker run -d -p 8080:80 web-app3
+
+
+
+
