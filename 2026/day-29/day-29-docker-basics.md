@@ -1,5 +1,3 @@
-# Task 1
-
 ## What is Docker?
 Docker is a containerization platform that lets you build applications, package them with all dependencies, and run them anywhere consistently.
 
