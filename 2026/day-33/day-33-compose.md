@@ -61,20 +61,95 @@ volumes:
   mysql-data:
 ```
 
----
+# Task 4: Compose Commands (Well Formatted)
 
-# Task 4: Compose Commands
-
-Start services in detached mode : docker compose up -d
-View running services : docker compose ps
-View logs of all services : docker compose logs or docker compose logs -f
-View logs of a specific service : docker compose logs service-name
-Stop services without removing : docker compose stop
-Remove everything (containers, networks) : docker compose down / docker compose down -v (for volumes)
-Rebuild images if you make a change : docker compose up -d --build
-Restart services : docker cokpose restart
+## 🚀 Start services in detached mode
+```bash
+docker compose up -d
+````
 
 ---
+
+## 👀 View running services
+
+```bash
+docker compose ps
+```
+
+---
+
+## 📜 View logs of all services
+
+```bash
+docker compose logs
+```
+
+### 🔁 Follow logs (live)
+
+```bash
+docker compose logs -f
+```
+
+---
+
+## 🔍 View logs of a specific service
+
+```bash
+docker compose logs service-name
+```
+
+### 🔁 Follow logs for a specific service
+
+```bash
+docker compose logs -f service-name
+```
+
+---
+
+## ⏹️ Stop services without removing containers
+
+```bash
+docker compose stop
+```
+
+---
+
+## 🗑️ Remove everything (containers + networks)
+
+```bash
+docker compose down
+```
+
+### ⚠️ Remove volumes also (DATA WILL BE LOST)
+
+```bash
+docker compose down -v
+```
+
+---
+
+## 🔄 Rebuild images after changes
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## 🔁 Restart services
+
+```bash
+docker compose restart
+```
+
+---
+
+## ⚡ Full clean restart (Best Practice)
+
+```bash
+docker compose down
+docker compose up -d --build
+```
 
 # Task 5: Environment Variables
 
