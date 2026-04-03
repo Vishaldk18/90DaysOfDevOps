@@ -89,4 +89,22 @@ ping IP (works)
 All containers on default bridge share same network
 They can communicate using IP addresses
 
+Task 5: Custom Networks
+docker network create my-app-net
+docker network ls
+docker run -itd --name c1 --network my-app-net alpine sh
+docker run -itd --name c2 --network my-app-net alpine sh
+
+docker exec -it c2 sh
+ping c1 (works)
+ping IP(c1) works
+
+On the default bridge network, containers cannot communicate using names because DNS resolution is not supported, but they can communicate using IP addresses. In contrast, user-defined bridge networks support both name and IP-based communication.
+
+Why does custom networking allow name-based communication but the default bridge doesn't?
+Custom Docker networks include an embedded DNS server that enables containers to resolve each other by name, supporting service discovery. The default bridge network lacks this DNS feature, so containers can only communicate using IP addresses.
+
+
+
+
 
