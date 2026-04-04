@@ -215,5 +215,3 @@ RUN apk add --no-cache curl
 * `--production` → install only production dependencies
 * `-R` → recursive operation
 * `apk add --no-cache` → install packages without cache (smaller image)
-
-```
