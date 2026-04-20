@@ -119,51 +119,93 @@ GitHub **only recognizes reusable workflows** from `.github/workflows/`.
 
 
 Task 2: Create Your First Reusable Workflow
-name: reusable-workflow
+name: Reusable Build Workflow
+
 on:
- workflow_call:
-  inputs:
-    app_name:
-     type: string
-     required: true
-    environment:
-     type: string
-     required: true
-     default: staging
-  secrets:
-    docker_token:
-     required: true
-   
+  workflow_call:
+    inputs:
+      app_name:
+        description: Application name
+        required: true
+        type: string
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: string
+
+    secrets:
+      docker_token:
+        required: true
+
+    outputs:
+      build_version:
+        description: Generated build version
+        value: ${{ jobs.build.outputs.build_version }}
+
 jobs:
- code:
-  runs-on: ubuntu-latest
-  steps:
-    - name: checkout code
-      uses: actions/checkoutcode@v4
- print:
-  runs-on: ubuntu-latest
-  steps:
-    - name: print app name with enviornment
-      run: echo "Building ${{ inputs.app_name }} for ${{ inputs.environment }}"
- print2:
-  runs-on: ubuntu-latest
-  steps:
-    - name: print secret set
-      run: echo "Docker token is set':' true"
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      build_version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print build info
+        run: |
+          echo "Building ${{ inputs.app_name }} for ${{ inputs.environment }}"
+          echo "Docker token is set: true"
+
+      - name: Generate build version
+        id: version
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          echo "version=v1.0-${SHORT_SHA}" >> $GITHUB_OUTPUT
 
 
 Task 3: Create a Caller Workflow
- name: call-another-workflow
+ name: Call Reusable Build
+
 on:
- push:
-  branches: [main]
+  push:
+    branches:
+      - main
+
 jobs:
   build:
-   uses: ./.github/workflows/reusable-build.yml
-   with:
-    app_name: "my-web-app"
-    environment: "production"
-   secrets:
-    docker_token: ${{ secrets.DOCKERHUB_PASSWORD }}
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      app_name: "my-web-app"
+      environment: "production"
+    secrets:
+      docker_token: ${{ secrets.DOCKER_TOKEN }}
 
 
+Task 4: Add Outputs to the Reusable Workflow
+name: Call Reusable Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      app_name: "my-web-app"
+      environment: "production"
+    secrets:
+      docker_token: ${{ secrets.DOCKER_TOKEN }}
+
+  print-version:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print build version
+        run: |
+          echo "Build version: ${{ needs.build.outputs.build_version }}"
