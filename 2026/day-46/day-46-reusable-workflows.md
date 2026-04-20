@@ -119,3 +119,51 @@ GitHub **only recognizes reusable workflows** from `.github/workflows/`.
 
 
 Task 2: Create Your First Reusable Workflow
+name: reusable-workflow
+on:
+ workflow_call:
+  inputs:
+    app_name:
+     type: string
+     required: true
+    environment:
+     type: string
+     required: true
+     default: staging
+  secrets:
+    docker_token:
+     required: true
+   
+jobs:
+ code:
+  runs-on: ubuntu-latest
+  steps:
+    - name: checkout code
+      uses: actions/checkoutcode@v4
+ print:
+  runs-on: ubuntu-latest
+  steps:
+    - name: print app name with enviornment
+      run: echo "Building ${{ inputs.app_name }} for ${{ inputs.environment }}"
+ print2:
+  runs-on: ubuntu-latest
+  steps:
+    - name: print secret set
+      run: echo "Docker token is set':' true"
+
+
+Task 3: Create a Caller Workflow
+ name: call-another-workflow
+on:
+ push:
+  branches: [main]
+jobs:
+  build:
+   uses: ./.github/workflows/reusable-build.yml
+   with:
+    app_name: "my-web-app"
+    environment: "production"
+   secrets:
+    docker_token: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+
