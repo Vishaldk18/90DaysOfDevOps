@@ -209,3 +209,67 @@ jobs:
       - name: Print build version
         run: |
           echo "Build version: ${{ needs.build.outputs.build_version }}"
+
+
+Task 5: Create a Composite Action
+What Is a Composite Action?
+A composite action:
+
+Groups multiple run steps into one action
+Is stored inside a repository (often .github/actions/...)
+Is executed using uses: just like marketplace actions
+Does NOT run on its own (always called from a workflow)
+Is ideal for shared scripts, setup tasks, or common logic
+
+name: demo-composite-action
+description: action that greets and prints date
+inputs:
+  name:
+   required: true
+  language:
+   required: true
+   default: en
+outputs:
+ greeted:
+  value: ${{ steps.set-output.outputs.greeted }}
+  
+runs:
+  using: composite
+  steps:
+   - name: greet
+     run: echo "Helloo ${{ inputs.name }}"
+     shell: bash
+   - name: print date and os
+     run: |
+      echo "Date: $(date) & OS: $RUNNER_OS"
+     shell: bash
+   - name: set output
+     id: set-output
+     run: echo "reeted=true" >> $GITHUB_OUTPUT
+     shell: bash
+      
+  
+   using composite action
+name: Use Composite Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run setup-and-greet action
+        id: greet
+        uses: ./.github/actions/setup-and-greet
+        with:
+          name: Vishal
+          language: en
+
+      - name: Verify output
+        run: echo "Greeted: ${{ steps.greet.outputs.greeted }}"
