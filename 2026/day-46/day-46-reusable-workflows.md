@@ -1,8 +1,10 @@
-Task 1: Understand workflow_call
-## 1. What is a reusable workflow?
+## **Task 1: Understand `workflow_call`**
 
-A **reusable workflow** is a **complete GitHub Actions workflow** that you can define once and call from other workflows.  
-Its purpose is to **share entire job logic** (jobs, steps, conditionals, environments, secrets) across repositories or within the same repository.
+### 1. What is a Reusable Workflow?
+
+A **reusable workflow** is a **complete GitHub Actions workflow** that you can define once and call from other workflows.
+
+It allows you to **share entire job logic** (jobs, steps, conditionals, environments, secrets) across repositories or within the same repository.
 
 Think of it as:
 
@@ -11,21 +13,21 @@ Think of it as:
 *   ✅ Able to accept **inputs and secrets**
 *   ✅ Versioned and centralized
 
-✅ Ideal for: CI standards, security scans, deployment pipelines, shared build logic.
+✅ **Ideal for:** CI standards, security scans, deployment pipelines, shared build logic
 
 ***
 
-## 2. What is the `workflow_call` trigger?
+### 2. What is the `workflow_call` Trigger?
 
 `workflow_call` is a **special event trigger** that makes a workflow reusable.
 
 It explicitly declares:
 
 *   What **inputs** the workflow accepts
-*   What **secrets** can be passed to it
+*   What **secrets** can be passed
 *   Optional **outputs** it returns
 
-### Example: Declaring a reusable workflow
+#### Example: Declaring a Reusable Workflow
 
 ```yaml
 # .github/workflows/build.yml
@@ -42,22 +44,22 @@ on:
         required: true
 ```
 
-Without `workflow_call`, a workflow **cannot be called by another workflow**.
+🚫 Without `workflow_call`, a workflow **cannot be called** by another workflow.
 
 ***
 
-## 3. How is calling a reusable workflow different from using a regular action (`uses:`)?
+### 3. Reusable Workflow vs Regular Action
 
-| Aspect                       | Reusable Workflow         | Regular Action             |
-| ---------------------------- | ------------------------- | -------------------------- |
-| Level                        | **Workflow / Jobs**       | **Single step**            |
-| Can contain jobs             | ✅ Yes                     | ❌ No                       |
-| Triggered by `workflow_call` | ✅ Yes                     | ❌ No                       |
-| Reuse scope                  | Full pipelines            | Individual tasks           |
-| Secrets handling             | Explicitly defined        | Implicit / inherited       |
-| Use case                     | CI pipelines, deployments | Linting, checkout, tooling |
+| Aspect                      | Reusable Workflow | Regular Action   |
+| --------------------------- | ----------------- | ---------------- |
+| Level                       | Workflow / Jobs   | Single step      |
+| Can contain jobs            | ✅ Yes             | ❌ No             |
+| Triggered by workflow\_call | ✅ Yes             | ❌ No             |
+| Reuse scope                 | Full pipelines    | Individual tasks |
+| Secrets handling            | Explicit          | Implicit         |
+| Use case                    | CI, deployments   | Linting, tooling |
 
-### Calling a reusable workflow
+#### Calling a Reusable Workflow
 
 ```yaml
 jobs:
@@ -69,56 +71,43 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-### Using a regular action
+#### Using a Regular Action
 
 ```yaml
 steps:
   - uses: actions/setup-node@v4
 ```
 
-🔑 **Key difference**
+🔑 **Key Rule**
 
 *   `uses:` at **job level** → reusable workflow
 *   `uses:` at **step level** → action
 
 ***
 
-## 4. Where must a reusable workflow file live?
+### 4. Where Must a Reusable Workflow Live?
 
-✅ **Mandatory location:**
+✅ **Mandatory location**
 
     .github/workflows/
 
-❌ It **cannot** be placed anywhere else.
+✅ Valid:
 
-### Valid paths
+    .github/workflows/deploy.yml
+    .github/workflows/ci/build.yml
 
-```text
-.github/workflows/deploy.yml
-.github/workflows/ci/build.yml
-```
+❌ Invalid:
 
-### Invalid paths
-
-```text
-.github/actions/build.yml     ❌
-.workflows/build.yml          ❌
-```
-
-GitHub **only recognizes reusable workflows** from `.github/workflows/`.
+    .github/actions/build.yml
+    .workflows/build.yml
 
 ***
 
-## Summary
+## **Task 2: Create Your First Reusable Workflow**
 
-*   ✅ A reusable workflow is a **callable workflow**, not just a step
-*   ✅ `workflow_call` enables workflows to be reused
-*   ✅ Reusable workflows operate at the **job/pipeline level**
-*   ✅ Regular actions operate at the **step level**
-*   ✅ Reusable workflow files **must** live in `.github/workflows/`
+📄 **`.github/workflows/reusable-build.yml`**
 
-
-Task 2: Create Your First Reusable Workflow
+```yaml
 name: Reusable Build Workflow
 
 on:
@@ -164,10 +153,16 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           echo "version=v1.0-${SHORT_SHA}" >> $GITHUB_OUTPUT
+```
 
+***
 
-Task 3: Create a Caller Workflow
- name: Call Reusable Build
+## **Task 3: Create a Caller Workflow**
+
+📄 **`.github/workflows/call-build.yml`**
+
+```yaml
+name: Call Reusable Build
 
 on:
   push:
@@ -182,16 +177,17 @@ jobs:
       environment: "production"
     secrets:
       docker_token: ${{ secrets.DOCKER_TOKEN }}
+```
 
+✅ Verify in **Actions tab** that the reusable workflow is triggered.
 
-Task 4: Add Outputs to the Reusable Workflow
-name: Call Reusable Build
+***
 
-on:
-  push:
-    branches:
-      - main
+## **Task 4: Use Outputs From the Reusable Workflow**
 
+Extend the caller workflow with a second job:
+
+```yaml
 jobs:
   build:
     uses: ./.github/workflows/reusable-build.yml
@@ -209,47 +205,73 @@ jobs:
       - name: Print build version
         run: |
           echo "Build version: ${{ needs.build.outputs.build_version }}"
+```
 
+✅ Output flows:
 
-Task 5: Create a Composite Action
-What Is a Composite Action?
+    Step → Job → Workflow → Caller
+
+***
+
+## **Task 5: Create a Composite Action**
+
+### What Is a Composite Action?
+
 A composite action:
 
-Groups multiple run steps into one action
-Is stored inside a repository (often .github/actions/...)
-Is executed using uses: just like marketplace actions
-Does NOT run on its own (always called from a workflow)
-Is ideal for shared scripts, setup tasks, or common logic
+*   Groups multiple `run` steps into one action
+*   Lives inside `.github/actions/`
+*   Is executed using `uses:`
+*   Does **not** run on its own
+*   Is ideal for shared setup or logic
 
+***
+
+### Composite Action Definition
+
+📄 **`.github/actions/setup-and-greet/action.yml`**
+
+```yaml
 name: demo-composite-action
 description: action that greets and prints date
+
 inputs:
   name:
-   required: true
+    required: true
   language:
-   required: true
-   default: en
+    required: true
+    default: en
+
 outputs:
- greeted:
-  value: ${{ steps.set-output.outputs.greeted }}
-  
+  greeted:
+    value: ${{ steps.set-output.outputs.greeted }}
+
 runs:
   using: composite
   steps:
-   - name: greet
-     run: echo "Helloo ${{ inputs.name }}"
-     shell: bash
-   - name: print date and os
-     run: |
-      echo "Date: $(date) & OS: $RUNNER_OS"
-     shell: bash
-   - name: set output
-     id: set-output
-     run: echo "reeted=true" >> $GITHUB_OUTPUT
-     shell: bash
-      
-  
-   using composite action
+    - name: greet
+      run: echo "Hello ${{ inputs.name }}"
+      shell: bash
+
+    - name: print date and os
+      run: |
+        echo "Date: $(date)"
+        echo "OS: $RUNNER_OS"
+      shell: bash
+
+    - name: set output
+      id: set-output
+      run: echo "greeted=true" >> $GITHUB_OUTPUT
+      shell: bash
+```
+
+***
+
+### Using the Composite Action
+
+📄 **`.github/workflows/use-composite.yml`**
+
+```yaml
 name: Use Composite Action
 
 on:
@@ -273,3 +295,21 @@ jobs:
 
       - name: Verify output
         run: echo "Greeted: ${{ steps.greet.outputs.greeted }}"
+```
+
+✅ Verify greeting, date, OS, and output in logs.
+
+***
+
+## **Task 6: Reusable Workflow vs Composite Action**
+
+| Feature                     | Reusable Workflow         | Composite Action       |
+| --------------------------- | ------------------------- | ---------------------- |
+| Triggered by                | `workflow_call`           | `uses:` in a step      |
+| Can contain jobs            | ✅ Yes                     | ❌ No                   |
+| Can contain multiple steps  | ✅ Yes                     | ✅ Yes                  |
+| Lives where                 | `.github/workflows`       | `.github/actions`      |
+| Can accept secrets directly | ✅ Yes                     | ❌ No (indirect only)   |
+| Best for                    | Reusable jobs / pipelines | Reusable steps / logic |
+
+***
