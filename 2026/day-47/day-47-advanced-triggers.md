@@ -154,3 +154,106 @@ GitHub may delay or skip scheduled (cron) workflows on inactive repositories bec
 This helps GitHub save compute resources and prevent abuse like forgotten or malicious jobs running forever.
 Only schedule-triggered workflows are affected—push, PR, or manual runs still work normally.
 Once the repo has any activity again, scheduled workflows usually resume.
+
+
+
+Task 4: Path & Branch Filters
+name: Smart Triggers - App Code Only
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+    paths:
+      - 'src/**'
+      - 'app/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ Code change detected in src/ or app/"
+
+
+
+name: Skip Docs Changes
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ Non-docs change detected"
+
+
+
+
+Task 5: workflow_run — Chain Workflows Together
+name: Run Tests
+
+on:
+  push:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests
+        run: echo "🧪 Running tests..."
+
+
+name: Deploy After Tests
+
+on:
+  workflow_run:
+    workflows: ["Run Tests"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check test workflow result
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          echo "::warning::Tests failed or were cancelled. Deployment will not proceed."
+          exit 0
+
+      - name: Deploy
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        run: echo "🚀 Tests passed. Proceeding with deployment."
+
+
+
+
+
+
+Task 6: repository_dispatch — External Event Triggers
+name: External Deploy Trigger
+
+on:
+  repository_dispatch:
+    types:
+      - deploy-request
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print deploy environment from client payload
+        run: |
+          echo "🚀 External deploy request received"
+          echo "Target environment: ${{ github.event.client_payload.environment }}"
+
