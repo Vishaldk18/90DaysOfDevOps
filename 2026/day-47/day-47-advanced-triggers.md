@@ -150,4 +150,7 @@ jobs:
 The cron expression for: every weekday at 9 AM IST : convert to ust first which is 3.30 am 30 3 * * 1-5
 The cron expression for: first day of every month at midnight : 0 0 1 * *
 
-
+GitHub may delay or skip scheduled (cron) workflows on inactive repositories because there’s been no activity for a long time (about 60 days).
+This helps GitHub save compute resources and prevent abuse like forgotten or malicious jobs running forever.
+Only schedule-triggered workflows are affected—push, PR, or manual runs still work normally.
+Once the repo has any activity again, scheduled workflows usually resume.
