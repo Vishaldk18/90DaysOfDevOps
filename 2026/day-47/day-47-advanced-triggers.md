@@ -1,364 +1,268 @@
-Below is the same content you provided, converted into a clean, well‑structured, README‑style document, without changing the meaning or logic. 
+Task 1: Pull Request Event Types
+
+name: pr-life-cycle-demo
+on:
+ pull_request: 
+  types:
+    - opened
+    - synchronize
+    - reopened
+    - closed
+jobs:
+ demo:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Print which event type fired
+      run: |
+          echo "Event Type: ${{ github.event.action }}"
+    - name: Print the PR title
+      run: |
+          echo "PR title: ${{ github.event.pull_request.title }}"
+    - name: Print the PR author
+      run: |
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+    - name: Print the source branch and target branch
+      run: |
+         echo "Source branch: ${{ github.event.pull_request.head.ref }}"
+         echo "Target branch: ${{ github.event.pull_request.base.ref }}"
+    - name: Run only when PR is merged
+      if: > 
+        github.event.action == 'closed' && 
+        github.event.pull_request.merged == true     
+      run: |
+          echo "✅ Pull request was merged successfully!"
+
+
+
+Task 2: PR Validation Workflow
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  file-size-check:
+    name: File size check (max 1 MB)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fail if any file exceeds 1 MB
+        run: |
+          echo "Checking for files larger than 1 MB in the PR..."
+          MAX_SIZE=$((1024 * 1024))
+
+          # List files changed in this PR
+          git fetch origin ${{ github.base_ref }}
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          OVERSIZED=false
+          for file in $FILES; do
+            if [ -f "$file" ]; then
+              SIZE=$(stat -c%s "$file")
+              if [ "$SIZE" -gt "$MAX_SIZE" ]; then
+                echo "::error::File '$file' is larger than 1 MB ($SIZE bytes)"
+                OVERSIZED=true
+              fi
+            fi
+          done
+
+          if [ "$OVERSIZED" = true ]; then
+            echo "❌ One or more files exceed the 1 MB limit"
+            exit 1
+          fi
+
+          echo "✅ All files are within size limits"
+
+  branch-name-check:
+    name: Branch naming convention check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Checking branch name: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix|docs)/.+$ ]]; then
+            echo "✅ Branch name follows convention"
+          else
+            echo "::error::Invalid branch name '$BRANCH_NAME'. Must start with feature/, fix/, or docs/"
+            exit 1
+          fi
+
+  pr-body-check:
+    name: PR description check (warning only)
+    runs-on: ubuntu-latest
 
- 
+    steps:
+      - name: Warn if PR body is empty
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
 
-🚀 GitHub Actions – Workflow Triggers & Automation Examples 
+          if [ -z "$PR_BODY" ]; then
+            echo "::warning::PR description is empty. Please add details for reviewers."
+          else
+            echo "✅ PR description is present"
+          fi
 
-This README documents multiple GitHub Actions workflow patterns, covering pull requests, validations, schedules, smart triggers, workflow chaining, and external event triggers. 
 
- 
+Task 3: Scheduled Workflows (Cron Deep Dive)
+name: Scheduled Tasks
 
-✅ Task 1: Pull Request Event Types 
+on:
+  schedule:
+    # Every Monday at 02:30 AM UTC
+    - cron: '30 2 * * 1'
+    # Every 6 hours
+    - cron: '0 */6 * * *'
 
-This workflow demonstrates how to respond to different pull request lifecycle events and extract useful metadata. 
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
 
-Workflow: pr-life-cycle-demo 
+    steps:
+      - name: Print which schedule triggered
+        run: |
+          echo "Workflow triggered by cron schedule:"
+          echo "${{ github.event.schedule }}"
 
-Triggers on PR events: 
+      - name: Health check - curl URL
+        run: |
+          URL="https://example.com"
+          echo "Running health check for $URL"
 
-opened 
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP status code: $STATUS_CODE"
 
-synchronize 
+          if [ "$STATUS_CODE" -ne 200 ]; then
+            echo "::error::Health check failed with status code $STATUS_CODE"
+            exit 1
+          fi
 
-reopened 
+          echo "✅ Health check passed"
 
-closed 
+The cron expression for: every weekday at 9 AM IST : convert to ust first which is 3.30 am 30 3 * * 1-5
+The cron expression for: first day of every month at midnight : 0 0 1 * *
 
-Behavior: 
+GitHub may delay or skip scheduled (cron) workflows on inactive repositories because there’s been no activity for a long time (about 60 days).
+This helps GitHub save compute resources and prevent abuse like forgotten or malicious jobs running forever.
+Only schedule-triggered workflows are affected—push, PR, or manual runs still work normally.
+Once the repo has any activity again, scheduled workflows usually resume.
 
-Prints: 
 
-Event type 
 
-PR title 
+Task 4: Path & Branch Filters
+name: Smart Triggers - App Code Only
 
-PR author 
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+    paths:
+      - 'src/**'
+      - 'app/**'
 
-Source branch 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ Code change detected in src/ or app/"
 
-Target branch 
 
-Runs a conditional step only when the PR is merged 
 
-1     name: pr-life-cycle-demo 
+name: Skip Docs Changes
 
-2      
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
 
-3     on: 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ Non-docs change detected"
 
-4       pull_request: 
 
-5         types: 
 
-6           - opened 
 
-7           - synchronize 
+Task 5: workflow_run — Chain Workflows Together
+name: Run Tests
 
-8           - reopened 
+on:
+  push:
 
-9           - closed 
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests
+        run: echo "🧪 Running tests..."
 
-10      
 
-11     jobs: 
+name: Deploy After Tests
 
-12       demo: 
+on:
+  workflow_run:
+    workflows: ["Run Tests"]
+    types:
+      - completed
 
-13         runs-on: ubuntu-latest 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-14         steps: 
+    steps:
+      - name: Check test workflow result
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          echo "::warning::Tests failed or were cancelled. Deployment will not proceed."
+          exit 0
 
-15           - name: Print which event type fired 
+      - name: Deploy
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        run: echo "🚀 Tests passed. Proceeding with deployment."
 
-16             run: echo "Event Type: ${{ github.event.action }}" 
 
-17      
 
-18           - name: Print the PR title 
 
-19             run: echo "PR title: ${{ github.event.pull_request.title }}" 
 
-20      
 
-21           - name: Print the PR author 
+Task 6: repository_dispatch — External Event Triggers
+name: External Deploy Trigger
 
-22             run: echo "PR Author: ${{ github.event.pull_request.user.login }}" 
+on:
+  repository_dispatch:
+    types:
+      - deploy-request
 
-23      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-24           - name: Print the source branch and target branch 
+    steps:
+      - name: Print deploy environment from client payload
+        run: |
+          echo "🚀 External deploy request received"
+          echo "Target environment: ${{ github.event.client_payload.environment }}"
 
-25             run: | 
 
-26               echo "Source branch: ${{ github.event.pull_request.head.ref }}" 
 
-27               echo "Target branch: ${{ github.event.pull_request.base.ref }}" 
+An external system triggers a pipeline when something outside GitHub needs to drive automation instead of code changes.
+Common cases include a Slack bot approving a deploy, a monitoring tool detecting an incident and triggering rollback, or a release platform requesting deployment to production.
+This enables event‑driven CI/CD, where actions happen based on operational signals, approvals, or system states rather than commits.
 
-28      
 
-29           - name: Run only when PR is merged 
 
-30             if: > 
-
-31               github.event.action == 'closed' && 
-
-32               github.event.pull_request.merged == true 
-
-33             run: echo "✅ Pull request was merged successfully!" 
-
- 
-
-✅ Task 2: PR Validation Workflow (PR Gate) 
-
-This workflow enforces quality checks on pull requests targeting main. 
-
-Workflow: PR Checks 
-
-✅ File Size Check 
-
-Fails if any changed file > 1 MB 
-
-✅ Branch Name Check 
-
-Allowed patterns: 
-
-feature/* 
-
-fix/* 
-
-docs/* 
-
-⚠️ PR Body Check 
-
-Warns (does not fail) if PR description is empty 
-
-1     name: PR Checks 
-
-2      
-
-3     on: 
-
-4       pull_request: 
-
-5         branches: 
-
-6           - main 
-
-Jobs Included 
-
-file-size-check 
-
-branch-name-check 
-
-pr-body-check 
-
-(Logic remains exactly as provided in your original workflow.) 
-
- 
-
-✅ Task 3: Scheduled Workflows (Cron Deep Dive) 
-
-Workflow: Scheduled Tasks 
-
-Schedules configured: 
-
-Every Monday at 02:30 AM UTC 
-
-Every 6 hours 
-
-Features: 
-
-Prints which cron schedule triggered the workflow 
-
-Performs a health check using curl 
-
-1     on: 
-
-2       schedule: 
-
-3         - cron: '30 2 * * 1' 
-
-4         - cron: '0 */6 * * *' 
-
- 
-
-Cron Expression Examples 
-
-🕘 Every weekday at 9 AM IST 
-
-Convert IST → UTC: 
-
-9:00 AM IST = 03:30 AM UTC 
-
-✅ Cron 
-
-1     30 3 * * 1-5 
-
- 
-
-📅 First day of every month at midnight (UTC) 
-
-✅ Cron 
-
-1     0 0 1 * * 
-
- 
-
-⚠️ Why Scheduled Workflows May Be Skipped 
-
-GitHub may delay or skip cron jobs on inactive repos (~60 days) 
-
-Helps save compute resources and prevent abuse 
-
-Only scheduled workflows are affected 
-
-Push, PR, and manual runs still work 
-
-Once the repo becomes active again, schedules resume 
-
- 
-
-✅ Task 4: Path & Branch Filters 
-
-Workflow: Smart Triggers (Run Only for App Code) 
-
-Runs only when code changes occur in src/ or app/ on specific branches. 
-
-1     on: 
-
-2       push: 
-
-3         branches: 
-
-4           - main 
-
-5           - 'release/*' 
-
-6         paths: 
-
-7           - 'src/**' 
-
-8           - 'app/**' 
-
- 
-
-Workflow: Skip Docs Changes 
-
-Skips workflow runs if only documentation files change. 
-
-1     on: 
-
-2       push: 
-
-3         branches: 
-
-4           - main 
-
-5           - 'release/*' 
-
-6         paths-ignore: 
-
-7           - '*.md' 
-
-8           - 'docs/**' 
-
-✅ Test result: 
-Pushing only a .md file → workflow is skipped. 
-
- 
-
-✅ Task 5: workflow_run — Chain Workflows Together 
-
-Workflow 1: Run Tests 
-
-Runs on every push. 
-
-1     name: Run Tests 
-
-2      
-
-3     on: 
-
-4       push: 
-
- 
-
-Workflow 2: Deploy After Tests 
-
-Runs only after “Run Tests” completes successfully. 
-
-Proceeds if tests ✅ succeeded 
-
-Prints warning and exits if tests ❌ failed 
-
-1     on: 
-
-2       workflow_run: 
-
-3         workflows: ["Run Tests"] 
-
-4         types: [completed] 
-
- 
-
-✅ Task 6: repository_dispatch — External Event Triggers 
-
-Workflow: External Deploy Trigger 
-
-Triggered by an external system (CI tool, Slack bot, monitoring system). 
-
-Responds to event type: deploy-request 
-
-Reads payload data from client_payload 
-
-1     on: 
-
-2       repository_dispatch: 
-
-3         types: 
-
-4           - deploy-request 
-
-Example Payload Data Used 
-
-1     { 
-
-2       "environment": "production" 
-
-3     } 
-
- 
-
-📌 When Would an External System Trigger a Pipeline? 
-
-An external system triggers a pipeline when automation needs to be driven by events outside GitHub, such as: 
-
-A Slack bot approving a deployment 
-
-A monitoring tool triggering rollback after an incident 
-
-A release system promoting code to production 
-
-✅ This enables event‑driven CI/CD, where actions are based on operational signals and approvals rather than code commits. 
-
- 
-
-✅ Summary 
-
-This README demonstrates: 
-
-PR lifecycle events 
-
-PR validation gates 
-
-Cron-based schedules 
-
-Path and branch filtering 
-
-Workflow chaining with workflow_run 
-
-External triggers with repository_dispatch 
-
-These patterns together form a real‑world GitHub Actions automation toolkit. 
-
- 
+convert to well formatted readme file keep the content same
