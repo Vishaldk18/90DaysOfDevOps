@@ -1,82 +1,89 @@
-Task 1: Understand Infrastructure as Code
+## Task 1: Understand Infrastructure as Code
 
 **IaC** means managing infrastructure (servers, networks, databases) **using code instead of manual setup**.
 
-**Why it matters in DevOps**
+### Why it matters in DevOps
+- Automates infrastructure
+- Ensures consistency across environments
+- Enables version control, reviews, and CI/CD
+- Reduces human errors
 
-*   Automates infrastructure
-*   Ensures consistency across environments
-*   Enables version control, reviews, and CI/CD
-*   Reduces human errors
+### Problems IaC Solves vs AWS Console
+- Manual errors → automated, repeatable setups  
+- No history → version‑controlled changes  
+- Hard to recreate → easy environment replication  
+- Slow provisioning → fast, scripted deployment  
 
-**Problems IaC solves vs AWS Console**
+---
 
-*   Manual errors → automated, repeatable setups
-*   No history → version‑controlled changes
-*   Hard to recreate → easy environment replication
-*   Slow provisioning → fast, scripted deployment
+## Terraform vs Other Tools
 
-***
+### Terraform vs CloudFormation
+- Terraform: multi‑cloud  
+- CloudFormation: AWS‑only  
 
-### Terraform vs Other Tools
+### Terraform vs Ansible
+- Terraform: creates infrastructure  
+- Ansible: configures servers/software  
 
-*   **Terraform vs CloudFormation**
-    *   Terraform: multi‑cloud
-    *   CloudFormation: AWS‑only
+### Terraform vs Pulumi
+- Terraform: simple declarative language (HCL)  
+- Pulumi: real programming languages  
 
-*   **Terraform vs Ansible**
-    *   Terraform: creates infrastructure
-    *   Ansible: configures servers/software
+---
 
-*   **Terraform vs Pulumi**
-    *   Terraform: simple declarative language (HCL)
-    *   Pulumi: real programming languages
+## Key Terraform Concepts
+- **Declarative**: Define *what you want*, Terraform decides *how to do it*
+- **Cloud‑agnostic**: Same tool for AWS, Azure, GCP, etc.
 
-***
+---
 
-### Key Terraform Concepts
+## Task 2: Install Terraform and Configure AWS
 
-*   **Declarative**: Define *what you want*, Terraform decides *how to do it*
-*   **Cloud‑agnostic**: Same tool for AWS, Azure, GCP, etc.
+---
 
-Task 2: Install Terraform and Configure AWS
-Task 3: Your First Terraform Config -- Create an S3 Bucket
+## Task 3: Your First Terraform Config – Create an S3 Bucket
+
+```hcl
 provider "aws" {
- region = "eu-north-1"
+  region = "eu-north-1"
 }
 
 resource "aws_s3_bucket" "my-bucket" {
- bucket = "vishaldk18-new-bucket"
+  bucket = "vishaldk18-new-bucket"
 }
+````
 
+### Terraform Initialization
 
+*   **`terraform init` downloads**: required **providers**, **modules**, and **backend plugins**
+*   **`.terraform/` directory**: local cache holding **provider binaries**, **module code**, and **backend metadata**
+*   ✅ Safe to delete; Terraform recreates it on next `terraform init`
 
-*   **`terraform init` downloads**: required **providers**, **modules**, and **backend plugins**.
-*   **`.terraform/` directory**: local cache holding **provider binaries**, **module code**, and **backend metadata**.
-*   ✅ Safe to delete; Terraform recreates it on next `terraform init`.
+***
 
+## Task 4: Add an EC2 Instance
 
-Task 4: Add an EC2 Instance
-
+```hcl
 resource "aws_instance" "my-instance" {
- ami = "ami-0a0823e4ea064404d"
- instance_type = "t3.micro"
- tags = {
+  ami           = "ami-0a0823e4ea064404d"
+  instance_type = "t3.micro"
+
+  tags = {
     Name = "TerraWeek-Day1"
- }
+  }
 }
+```
 
-
-
-How does Terraform know the S3 bucket already exists and only the EC2 instance needs to be created?
+### How Does Terraform Know Only EC2 Needs to Be Created?
 
 Terraform knows because of **state + refresh from the provider API**.
 
-### How it works:
+#### How it works:
 
 1.  **Terraform state file (`terraform.tfstate`)**
-    *   Records resources Terraform already manages (like the S3 bucket).
-    *   If the bucket is in state, Terraform knows it exists.
+    *   Records resources Terraform already manages (like the S3 bucket)
+    *   If the bucket is in state, Terraform knows it exists
 
 2.  **State refresh (during `plan` / `apply`)**
     *   Terraform asks AWS: *“Does this resource exist and match the config?”*
@@ -85,79 +92,80 @@ Terraform knows because of **state + refresh from the provider API**.
 
 3.  **Execution plan**
     *   Terraform compares:
-        *   **Desired config**
-        *   **Current state**
-        *   **Actual AWS infrastructure**
-    *   Result: Only EC2 is created.
+        *   Desired config
+        *   Current state
+        *   Actual AWS infrastructure
+    *   Result: Only EC2 is created
 
-### In one line:
+**In one line:**
 
-✅ **S3 exists in state and AWS → no action**  
-✅ **EC2 missing → Terraform creates it**
+*   ✅ S3 exists in state and AWS → no action
+*   ✅ EC2 missing → Terraform creates it
 
-If the S3 bucket existed **but was not in state**, Terraform would try to create it unless you `terraform import` it.
+> If the S3 bucket existed **but was not in state**, Terraform would try to create it unless you run `terraform import`.
 
+***
 
+## Task 5: Understand the State File
 
-Task 5: Understand the State File
-
-Here’s a **short explanation of each Terraform state command**:
+### Terraform State Commands
 
 ```bash
 terraform show
 ```
 
-✅ Shows a **human‑readable view of the current Terraform state** (all managed resources and their attributes).
+✅ Shows a **human‑readable view of the current Terraform state**.
 
 ```bash
 terraform state list
 ```
 
-✅ Lists **all resources Terraform is currently managing** (from the state file).
+✅ Lists **all resources Terraform is managing**.
 
 ```bash
 terraform state show aws_s3_bucket.<name>
 ```
 
-✅ Displays **detailed state information** for a specific S3 bucket.
+✅ Shows **detailed state** of a specific S3 bucket.
 
 ```bash
 terraform state show aws_instance.<name>
 ```
 
-✅ Displays **detailed state information** for a specific EC2 instance.
+✅ Shows **detailed state** of a specific EC2 instance.
 
-### In short:
+### Summary
 
 *   `show` → entire state summary
 *   `state list` → resource names only
-*   `state show` → deep details of one resource
+*   `state show` → detailed resource data
 
-These commands **read state only** and do **not change infrastructure**.
-
-
-### What information does the Terraform state file store?
-
-For **each resource**, the state file stores:
-
-*   **Resource ID** (real ID in AWS, Azure, etc.)
-*   **Resource type & name** (e.g., `aws_s3_bucket.logs`)
-*   **Current attributes** (ARN, IPs, names, tags, etc.)
-*   **Dependencies** between resources
-*   **Provider metadata**
-
-✅ Terraform uses this to map **code ↔ real infrastructure**.
+These commands are **read‑only** and do **not** modify infrastructure.
 
 ***
 
-### Why should you NEVER manually edit the state file?
+### What Information Does the State File Store?
 
-*   High risk of **corrupting state**
-*   Terraform may **destroy or recreate resources accidentally**
+For each resource:
+
+*   Resource ID (real cloud ID)
+*   Resource type & name (e.g., `aws_s3_bucket.logs`)
+*   Current attributes (ARNs, IPs, tags, etc.)
+*   Dependencies
+*   Provider metadata
+
+✅ Used to map **code ↔ real infrastructure**
+
+***
+
+### Why You Should NEVER Edit the State File Manually
+
+*   High risk of corruption
+*   May destroy or recreate resources accidentally
 *   Breaks dependency tracking
-*   Changes are **not validated**
+*   No validation
 
-✅ Always use Terraform commands:
+✅ Use Terraform commands instead:
 
 ```bash
 terraform state mv
@@ -167,39 +175,32 @@ terraform import
 
 ***
 
-### Why should the state file NOT be committed to Git?
+### Why the State File Should NOT Be Committed to Git
 
-*   Contains **sensitive data**
-    *   passwords
-    *   secrets
-    *   private IPs
-*   Causes **merge conflicts** (state is environment‑specific)
-*   Security risk if repo is leaked
+*   Contains sensitive data (passwords, secrets, private IPs)
+*   Causes merge conflicts
+*   Security risk if leaked
 
-✅ Best practice:
+✅ Best practices:
 
-*   Store state in **remote backend** (S3 + DynamoDB, Terraform Cloud)
+*   Use a **remote backend** (S3 + DynamoDB, Terraform Cloud)
 *   Add `terraform.tfstate*` to `.gitignore`
+
+> **One‑line summary:**  
+> The state file is Terraform’s **source of truth**—never edit it, never commit it, and always protect it.
 
 ***
 
-### One‑line summary
+## Task 6: Modify, Plan, and Destroy
 
-> The state file is Terraform’s **source of truth**—never edit it, never commit it, and always protect it.
+### Terraform Plan / Apply Symbols
 
+*   **`+` (Plus)** → Create a new resource
+*   **`-` (Minus)** → Destroy an existing resource
+*   **`~` (Tilde)** → Update resource in place
 
-Task 6: Modify, Plan, and Destroy
-
-In Terraform plan/apply output, the symbols mean:
-
-
-+ (Plus) → Create
-A new resource will be created.
-
-
-- (Minus) → Destroy
-An existing resource will be deleted.
-
-
-~ (Tilde) → Update in place
-An existing resource will be modified without being recreated.
+```text
++ create
+- destroy
+~ update in place
+```
