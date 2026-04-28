@@ -1,11 +1,3 @@
-````markdown
-# Terraform Variables, Data Sources, Outputs, Locals & Functions – TerraWeek
-
-This README documents all Terraform concepts and configurations used across **Tasks 1–6**.  
-The content is preserved exactly as provided, with improved readability and structure.
-
----
-
 ## 📌 Task 1: Extract Variables
 
 ### Terraform Variables
