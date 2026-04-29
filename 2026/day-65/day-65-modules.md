@@ -489,3 +489,37 @@ module "api_server" {
 }
 
 ```
+
+
+## Task 6: Module Versioning and Best Practices
+
+Always pin Terraform module versions to avoid unexpected breaking changes.
+
+### ✅ Version Pinning Options
+
+**Exact version (most stable)**
+```hcl
+version = "5.1.0"
+````
+
+**Pessimistic constraint (recommended)**
+
+```hcl
+version = "~> 5.0"
+```
+
+Allows any 5.x version, blocks 6.x.
+
+**Explicit range**
+
+```hcl
+version = ">= 5.0, < 6.0"
+```
+
+### 🔄 Upgrade Modules Safely
+
+```bash
+terraform init -upgrade
+```
+
+Checks and downloads newer versions within allowed constraints.
