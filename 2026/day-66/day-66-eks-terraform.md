@@ -1,16 +1,25 @@
-Task 1: Project Setup
+## ✅ Task 1: Project Setup
+
+### 📁 Directory Structure
+
+```text
 terraform-eks/
-  providers.tf        # Provider and backend config
-  vpc.tf              # VPC module call
-  eks.tf              # EKS module call
-  variables.tf        # All input variables
-  outputs.tf          # Cluster outputs
-  terraform.tfvars    # Variable values
+├── providers.tf        # Provider and backend config
+├── vpc.tf              # VPC module call
+├── eks.tf              # EKS module call
+├── variables.tf        # All input variables
+├── outputs.tf          # Cluster outputs
+├── terraform.tfvars    # Variable values
+└── k8s/
+    └── nginx-deployment.yaml
+```
 
+***
 
-  # providers.tf
+### 📄 `providers.tf`
 
-  terraform {
+```hcl
+terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
@@ -25,7 +34,7 @@ terraform-eks/
     }
   }
 
-  # Optional: Remote backend (uncomment and adjust when needed)
+  # Optional: Remote backend
   # backend "s3" {
   #   bucket         = "my-terraform-state-bucket"
   #   key            = "eks/terraform.tfstate"
@@ -39,49 +48,56 @@ provider "aws" {
   region = var.region
 }
 
-# Kubernetes provider will be fully configured
-# after the EKS cluster is created
+# Kubernetes provider (configured after cluster creation)
 provider "kubernetes" {
   host                   = null
   cluster_ca_certificate = null
   token                  = null
 }
+```
 
+***
 
-# variables.tf
-variable "region"{
- type = string
+### 📄 `variables.tf`
+
+```hcl
+variable "region" {
+  type = string
 }
 
-variable "cluster_name"{
- type = string
- default = "terraweek-eks"
+variable "cluster_name" {
+  type    = string
+  default = "terraweek-eks"
 }
 
-variable "cluster_version"{
- type = string
- default = "1.31"
+variable "cluster_version" {
+  type    = string
+  default = "1.31"
 }
 
-variable "node_instance_type"{
- type = string
- default = "t3.medium"
+variable "node_instance_type" {
+  type    = string
+  default = "t3.medium"
 }
 
-variable "vpc_cidr"{
- type = string
- default = "10.0.0.0/16"
+variable "vpc_cidr" {
+  type    = string
+  default = "10.0.0.0/16"
 }
 
-variable "node_desired_count"{
- type = string
- default = 2
+variable "node_desired_count" {
+  type    = string
+  default = 2
 }
+```
 
-Task 2: Create the VPC with Registry Module
+***
 
-# vpc.tf 
+## ✅ Task 2: Create the VPC (Registry Module)
 
+### 📄 `vpc.tf`
+
+```hcl
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
@@ -101,41 +117,54 @@ module "vpc" {
   enable_dns_hostnames = true
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb"                    = "1"
-    "kubernetes.io/cluster/terraweek-eks"       = "shared"
+    "kubernetes.io/role/elb"              = "1"
+    "kubernetes.io/cluster/terraweek-eks" = "shared"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"            = "1"
-    "kubernetes.io/cluster/terraweek-eks"        = "shared"
+    "kubernetes.io/role/internal-elb"     = "1"
+    "kubernetes.io/cluster/terraweek-eks" = "shared"
   }
 }
-
-
-Why does EKS need both public and private subnets? What do the subnet tags do?
-*   **Private subnets** → EKS worker nodes
-    *   Keep nodes secure (no public IPs)
-    *   Access internet via NAT for updates, ECR, AWS APIs
-
-*   **Public subnets** → Load balancers & NAT gateway
-    *   Expose apps to the internet (ALB/NLB)
-    *   Provide outbound access for private subnets
+```
 
 ***
 
-**Subnet tags:**
+### ❓ Why does EKS need both public and private subnets?
 
-*   `kubernetes.io/role/elb` → For **internet-facing** load balancers
-*   `kubernetes.io/role/internal-elb` → For **internal** load balancers
-*   `kubernetes.io/cluster/<cluster-name>` → Lets EKS discover and use the subnet
+#### 🔒 Private subnets → Worker Nodes
 
-👉 Without these tags, EKS services and load balancers won’t work properly.
+*   No public IPs (secure by default)
+*   Outbound internet access via NAT Gateway
+*   Used for ECR, AWS APIs, OS updates
 
+#### 🌍 Public subnets → Load balancers & NAT
 
-Task 3: Create the EKS Cluster with Registry Module
+*   Host ALB / NLB for internet access
+*   Contain NAT Gateway for private subnets
 
-eks.tf 
+***
 
+### 🏷️ Subnet Tags Explained
+
+*   `kubernetes.io/role/elb`  
+    → Internet‑facing LoadBalancers
+
+*   `kubernetes.io/role/internal-elb`  
+    → Internal LoadBalancers
+
+*   `kubernetes.io/cluster/<cluster-name>`  
+    → Allows EKS to discover & use the subnet
+
+> ⚠️ Without these tags, LoadBalancer services will not work.
+
+***
+
+## ✅ Task 3: Create the EKS Cluster (Registry Module)
+
+### 📄 `eks.tf`
+
+```hcl
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -148,7 +177,7 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
-  # ✅ REQUIRED for kubectl access
+  # REQUIRED for kubectl access
   enable_cluster_creator_admin_permissions = true
 
   eks_managed_node_groups = {
@@ -168,16 +197,32 @@ module "eks" {
     ManagedBy   = "Terraform"
   }
 }
+```
 
-terraform init      # Download EKS module and its dependencies
-terraform plan     
+***
 
+### ▶️ Initialize & Plan
 
-Task 4: Apply and Connect kubectl
+```bash
+terraform init
+terraform plan
+```
+
+***
+
+## ✅ Task 4: Apply and Connect kubectl
+
+### ▶️ Apply Terraform
+
+```bash
 terraform apply
+```
 
-outputs.tf
+***
 
+### 📄 `outputs.tf`
+
+```hcl
 output "cluster_name" {
   value = module.eks.cluster_name
 }
@@ -189,11 +234,137 @@ output "cluster_endpoint" {
 output "cluster_region" {
   value = var.region
 }
+```
 
-Update your kubeconfig:
-aws eks update-kubeconfig --name terraweek-eks --region <your-region>
+***
 
-Verify:
+### 🔑 Configure kubeconfig
+
+```bash
+aws eks update-kubeconfig \
+  --name terraweek-eks \
+  --region <your-region>
+```
+
+***
+
+### ✅ Verify Cluster
+
+```bash
 kubectl get nodes
 kubectl get pods -A
 kubectl cluster-info
+```
+
+***
+
+## ✅ Task 5: Deploy a Workload
+
+### 📄 `k8s/nginx-deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-terraweek
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+***
+
+### ▶️ Apply Workload
+
+```bash
+kubectl apply -f k8s/nginx-deployment.yaml
+```
+
+***
+
+### 🌐 Wait for External IP
+
+```bash
+kubectl get svc nginx-service -w
+```
+
+Access the **LoadBalancer URL** in your browser.
+
+***
+
+### ✅ Verify Everything
+
+```bash
+kubectl get nodes
+kubectl get deployments
+kubectl get pods
+kubectl get svc
+```
+
+***
+
+## ✅ Task 6: Destroy Everything
+
+### 🔥 Remove Kubernetes Resources
+
+```bash
+kubectl delete -f k8s/nginx-deployment.yaml
+```
+
+Wait until:
+
+*   AWS Load Balancer is fully deleted
+
+***
+
+### 🧨 Destroy Terraform Resources
+
+```bash
+terraform destroy
+```
+
+⏳ Takes \~10–15 minutes.
+
+***
+
+## ✅ Done 🎉
+
+You now have:
+
+*   A production‑grade VPC
+*   Secure EKS cluster
+*   Working LoadBalancer service
+*   Full clean‑up process
+
+If you want, I can:
+
+*   Add **IRSA**
+*   Add **Ingress + ALB**
+*   Convert this into **GitHub‑ready README**
+*   Add **remote state (S3 + DynamoDB)**
