@@ -24,8 +24,8 @@ terraform-modules/
 
 ***
 
-Root module: The main folder where Terraform starts. You run Terraform commands here, and it can directly create resources or call other modules.
-Child module: A separate, reusable set of Terraform files that the root (or another module) calls to avoid repeating code.
+### Root module: The main folder where Terraform starts. You run Terraform commands here, and it can directly create resources or call other modules.
+### Child module: A separate, reusable set of Terraform files that the root (or another module) calls to avoid repeating code.
 
 In simple terms:
 Root module = starting point
@@ -214,11 +214,7 @@ output "sg_id" {
 }
 ```
 
-Task 4: Call Your Modules from Root
-
-Below is a **clean, working root configuration** that wires your **VPC + subnet**, **security‑group module**, and **EC2 module** together exactly as Task 4 asks.
-
-***
+# Task 4: Call Your Modules from Root
 
 ## 📁 Root Directory Structure
 
