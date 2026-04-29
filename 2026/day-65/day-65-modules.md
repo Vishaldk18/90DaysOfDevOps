@@ -371,4 +371,121 @@ terraform plan    # Shows VPC, subnet, SG, and 2 EC2 instances
 terraform apply
 ```
 
+# Task 5 Use a Public Registry Module
 
+```hcl
+locals {
+  common_tags = {
+    Project     = "Demo"
+    Environment = "dev"
+    ManagedBy   = "Terraform"
+  }
+}
+
+/*
+resource "aws_vpc" "main"{
+ cidr_block = "10.0.0.0/16"
+ tags = {
+   Name = "my-vpc"
+ }
+}
+
+resource "aws_subnet" "public"{
+ vpc_id = aws_vpc.main.id
+ cidr_block = "10.0.1.0/24"
+ map_public_ip_on_launch = true
+ tags = {
+   Name = "public-subnet"
+ }
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "igw"
+  }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "public-rt"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+*/
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+
+  name = "terraweek-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["eu-north-1a", "eu-north-1b"]
+  public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
+  private_subnets = ["10.0.3.0/24", "10.0.4.0/24"]
+
+  enable_nat_gateway = false
+  enable_dns_hostnames = true
+  map_public_ip_on_launch = true
+  tags = local.common_tags
+}
+
+data "aws_ami" "amazon_linux"{
+ most_recent = true
+ owners = ["amazon"]
+
+ filter {
+    name = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+ }
+}
+
+
+module "web_sg"{
+ source        = "./modules/security-group"
+ vpc_id = module.vpc.vpc_id
+ sg_name = "web-sg"
+ ingress_ports = [22, 80, 443]
+ tags          = local.common_tags
+
+}
+
+
+
+module "web_server" {
+  source             = "./modules/ec2-instance"
+  ami_id             = data.aws_ami.amazon_linux.id
+  instance_type      = "t3.micro"
+  subnet_id          = module.vpc.public_subnets[0]
+  security_group_ids = [module.web_sg.sg_id]
+  instance_name      = "web-server"
+  tags               = local.common_tags
+}
+
+
+
+module "api_server" {
+  source             = "./modules/ec2-instance"
+  ami_id             = data.aws_ami.amazon_linux.id
+  instance_type      = "t3.micro"
+  subnet_id          = module.vpc.public_subnets[1]
+  security_group_ids = [module.web_sg.sg_id]
+  instance_name      = "api-server"
+  tags               = local.common_tags
+}
+
+```
