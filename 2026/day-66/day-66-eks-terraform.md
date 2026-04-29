@@ -352,19 +352,3 @@ terraform destroy
 ⏳ Takes \~10–15 minutes.
 
 ***
-
-## ✅ Done 🎉
-
-You now have:
-
-*   A production‑grade VPC
-*   Secure EKS cluster
-*   Working LoadBalancer service
-*   Full clean‑up process
-
-If you want, I can:
-
-*   Add **IRSA**
-*   Add **Ingress + ALB**
-*   Convert this into **GitHub‑ready README**
-*   Add **remote state (S3 + DynamoDB)**
