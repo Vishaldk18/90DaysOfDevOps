@@ -1,11 +1,16 @@
 # Task 1: Understand Module Structure
 ## A Terraform module is just a directory with .tf files. Create this structure:
 
+# Terraform Modules Structure & Explanation
+
+## 📁 Project Structure
+
+```text
 terraform-modules/
   main.tf                    # Root module -- calls child modules
   variables.tf               # Root variables
   outputs.tf                 # Root outputs
-  providers.tf               # Provider config
+  providers.tf               # Provider configuration
   modules/
     ec2-instance/
       main.tf                # EC2 resource definition
@@ -15,7 +20,9 @@ terraform-modules/
       main.tf                # Security group resource definition
       variables.tf           # Module inputs
       outputs.tf             # Module outputs
+```
 
+***
 
 Root module: The main folder where Terraform starts. You run Terraform commands here, and it can directly create resources or call other modules.
 Child module: A separate, reusable set of Terraform files that the root (or another module) calls to avoid repeating code.
@@ -24,7 +31,8 @@ In simple terms:
 Root module = starting point
 Child module = reusable building block
 
-Task 2: Build a Custom EC2 Module
+***
+# Task 2: Build a Custom EC2 Module
 ## 📁 Directory Structure
 
 ```text
