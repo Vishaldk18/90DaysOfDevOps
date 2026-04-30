@@ -511,6 +511,71 @@ variable "ingress_ports" {
 
 **`main.tf`** -- call all three modules, passing workspace-aware names and variables.
 
+```hcl
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+module "vpc" {
+  source = "./modules/vpc"
+
+  cidr               = var.vpc_cidr
+  public_subnet_cidr = var.subnet_cidr
+  environment        = local.environment
+  project_name       = var.project_name
+}
+
+module "security_group" {
+  source = "./modules/security-group"
+
+  vpc_id        = module.vpc.vpc_id
+  ingress_ports = var.ingress_ports
+  environment   = local.environment
+  project_name  = var.project_name
+}
+
+module "ec2" {
+  source = "./modules/ec2-instance"
+
+  ami_id               = data.aws_ami.amazon_linux.id
+  instance_type        = var.instance_type
+  subnet_id            = module.vpc.subnet_id
+  security_group_ids   = [module.security_group.sg_id]
+  environment          = local.environment
+  project_name         = var.project_name
+}
+
+```
+
+**`providers.tf`**
+```
+terraform {
+  required_version = ">= 1.3.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "eu-north-1"
+
+  default_tags {
+    tags = local.common_tags
+  }
+}
+
+```
+
 **Environment-specific tfvars:**
 
 `dev.tfvars`:
@@ -540,4 +605,124 @@ ingress_ports = [80, 443]
 Notice: dev allows SSH, prod does not. Different CIDRs prevent overlap. Instance types scale up per environment.
 
 ---
+
+### Task 5: Deploy All Three Environments
+Deploy each environment using its workspace and tfvars file:
+
+**Dev:**
+```bash
+terraform workspace select dev
+terraform plan -var-file="dev.tfvars"
+terraform apply -var-file="dev.tfvars"
+```
+
+**Staging:**
+```bash
+terraform workspace select staging
+terraform plan -var-file="staging.tfvars"
+terraform apply -var-file="staging.tfvars"
+```
+
+**Prod:**
+```bash
+terraform workspace select prod
+terraform plan -var-file="prod.tfvars"
+terraform apply -var-file="prod.tfvars"
+```
+
+After all three are deployed, verify:
+```bash
+# Check each workspace's resources
+terraform workspace select dev && terraform output
+terraform workspace select staging && terraform output
+terraform workspace select prod && terraform output
+```
+
+Go to the AWS console and verify:
+- Three separate VPCs with different CIDR ranges
+- Three EC2 instances with different instance types
+- Different Name tags per environment: `terraweek-dev-server`, `terraweek-staging-server`, `terraweek-prod-server`
+
+**Verify:** Are all three environments completely isolated from each other?
+
+---
+
+### Task 6: Document Best Practices
+Write down everything you have learned this week as a Terraform best practices guide:
+
+1. **File structure** -- separate files for providers, variables, outputs, main, locals
+2. **State management** -- always use remote backend, enable locking, enable versioning
+3. **Variables** -- never hardcode, use tfvars per environment, validate with `validation` blocks
+4. **Modules** -- one concern per module, always define inputs/outputs, pin registry module versions
+5. **Workspaces** -- use for environment isolation, reference `terraform.workspace` in configs
+6. **Security** -- .gitignore for state and tfvars, encrypt state at rest, restrict backend access
+7. **Commands** -- always run `plan` before `apply`, use `fmt` and `validate` before committing
+8. **Tagging** -- tag every resource with project, environment, and managed-by
+9. **Naming** -- consistent prefix pattern: `<project>-<environment>-<resource>`
+10. **Cleanup** -- always `terraform destroy` non-production environments when not in use
+
+---
+
+### Task 7: Destroy All Environments
+Clean up all three environments in reverse order:
+
+```bash
+terraform workspace select prod
+terraform destroy -var-file="prod.tfvars"
+
+terraform workspace select staging
+terraform destroy -var-file="staging.tfvars"
+
+terraform workspace select dev
+terraform destroy -var-file="dev.tfvars"
+```
+
+Verify in the AWS console -- all VPCs, instances, security groups, and gateways should be gone.
+
+Delete the workspaces:
+```bash
+terraform workspace select default
+terraform workspace delete dev
+terraform workspace delete staging
+terraform workspace delete prod
+```
+
+**Verify:** Is your AWS account completely clean?
+
+---
+
+## Hints
+- Each workspace has its own state file -- `terraform.tfstate.d/<workspace>/terraform.tfstate`
+- `terraform.workspace` is a built-in variable available in any config
+- You cannot delete a workspace you are currently on -- switch to `default` first
+- Different VPC CIDRs per environment prevent accidental peering conflicts
+- `terraform plan -var-file` does NOT auto-load `terraform.tfvars` when you specify `-var-file`
+- If you forget which workspace you are on: `terraform workspace show`
+- Workspaces work with remote backends too -- S3 key becomes `env:/<workspace>/terraform.tfstate`
+
+---
+
+## Documentation
+Create `day-67-terraweek-capstone.md` with:
+- Your complete project structure (directory tree)
+- All three custom module configs
+- Root `main.tf` showing workspace-aware module calls
+- All three tfvars files with the differences highlighted
+- Screenshot of all three environments running simultaneously in AWS
+- Screenshot of `terraform output` from each workspace
+- Your Terraform best practices guide (Task 6)
+- A table mapping each TerraWeek day to the concepts learned:
+
+| Day | Concepts |
+|-----|----------|
+| 61 | IaC, HCL, init/plan/apply/destroy, state basics |
+| 62 | Providers, resources, dependencies, lifecycle |
+| 63 | Variables, outputs, data sources, locals, functions |
+| 64 | Remote backend, locking, import, drift |
+| 65 | Custom modules, registry modules, versioning |
+| 66 | EKS with modules, real-world provisioning |
+| 67 | Workspaces, multi-env, capstone project |
+
+---
+
 
