@@ -466,5 +466,78 @@ output "public_ip" {
 ```
 
 
+### Task 4: Wire It All Together with Workspace-Aware Config
+In the root module, use `terraform.workspace` to drive environment-specific behavior.
 
+**`locals.tf`:**
+```hcl
+locals {
+  environment = terraform.workspace
+  name_prefix = "${var.project_name}-${local.environment}"
+
+  common_tags = {
+    Project     = var.project_name
+    Environment = local.environment
+    ManagedBy   = "Terraform"
+    Workspace   = terraform.workspace
+  }
+}
+```
+
+**`variables.tf`:**
+```hcl
+variable "project_name" {
+  type    = string
+  default = "terraweek"
+}
+
+variable "vpc_cidr" {
+  type = string
+}
+
+variable "subnet_cidr" {
+  type = string
+}
+
+variable "instance_type" {
+  type = string
+}
+
+variable "ingress_ports" {
+  type    = list(number)
+  default = [22, 80]
+}
+```
+
+**`main.tf`** -- call all three modules, passing workspace-aware names and variables.
+
+**Environment-specific tfvars:**
+
+`dev.tfvars`:
+```hcl
+vpc_cidr      = "10.0.0.0/16"
+subnet_cidr   = "10.0.1.0/24"
+instance_type = "t2.micro"
+ingress_ports = [22, 80]
+```
+
+`staging.tfvars`:
+```hcl
+vpc_cidr      = "10.1.0.0/16"
+subnet_cidr   = "10.1.1.0/24"
+instance_type = "t2.small"
+ingress_ports = [22, 80, 443]
+```
+
+`prod.tfvars`:
+```hcl
+vpc_cidr      = "10.2.0.0/16"
+subnet_cidr   = "10.2.1.0/24"
+instance_type = "t3.small"
+ingress_ports = [80, 443]
+```
+
+Notice: dev allows SSH, prod does not. Different CIDRs prevent overlap. Instance types scale up per environment.
+
+---
 
