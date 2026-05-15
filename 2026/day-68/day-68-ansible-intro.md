@@ -344,3 +344,23 @@ ansible_host_key_checking=false
 ```
 
 ---
+
+# Task 4: Create Your Inventory File
+
+```
+[web]
+web-server ansible_host=16.171.196.16
+[app]
+app-server ansible_host=16.171.208.190
+
+
+[all:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=/home/ubuntu/keys/ansible-demo
+ansible_host_key_checking=false
+```
+
+```
+ansible all -i inventory.ini -m ping
+```
+
