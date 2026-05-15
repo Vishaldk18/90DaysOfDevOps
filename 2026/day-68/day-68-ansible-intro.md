@@ -407,3 +407,44 @@ For example, if you try to install a package without --become, the task may fail
 In simple terms, --become is needed whenever the task requires administrative or root access on the target machine.
 ```
 ---
+
+### Task 6: Explore Inventory Groups and Patterns
+1. **Create a group of groups** -- add this to your `inventory.ini`:
+```ini
+[application:children]
+web
+app
+
+[all_servers:children]
+application
+db
+```
+
+2. Run commands against different groups:
+```bash
+ansible application -i inventory.ini -m ping     # web + app servers
+ansible db -i inventory.ini -m ping               # only db server
+ansible all_servers -i inventory.ini -m ping      # everything
+```
+
+3. **Use patterns:**
+```bash
+ansible 'web:app' -i inventory.ini -m ping        # OR: web or app
+ansible 'all:!db' -i inventory.ini -m ping        # NOT: all except db
+```
+
+4. **Create an `ansible.cfg`** to avoid typing `-i inventory.ini` every time:
+```ini
+[defaults]
+inventory = inventory.ini
+host_key_checking = False
+remote_user = ec2-user
+private_key_file = ~/your-key.pem
+```
+
+Now you can simply run:
+```bash
+ansible all -m ping
+```
+---
+
