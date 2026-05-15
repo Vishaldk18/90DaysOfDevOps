@@ -325,8 +325,8 @@ ansible --version
 
 Confirm the output shows the Ansible version, config file path, and Python version.
 
-**Document:** On which machine did you install Ansible? Why is it only needed on the control node?
 ***
+**Document:** On which machine did you install Ansible? Why is it only needed on the control node?
 Ansible is needed only on the control node because it is designed to work using an agentless architecture, which means there is no requirement to install any software or agent on the managed nodes. The control node directly connects to the target machines using SSH, which is already available on most Linux systems. When a task is executed, Ansible sends small pieces of code called modules to the managed nodes, runs them temporarily using Python, and then removes them after execution. Because of this push-based mechanism, all the processing and orchestration happen on the control node itself, while the managed nodes simply execute the instructions they receive and return the results. This approach reduces setup complexity, avoids maintaining agents on multiple servers, and makes Ansible lightweight and easy to use.
 ***
 
