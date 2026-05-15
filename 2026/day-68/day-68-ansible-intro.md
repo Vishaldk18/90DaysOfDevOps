@@ -331,7 +331,7 @@ Ansible is needed only on the control node because it is designed to work using 
 ***
 
 # Default Host file template
-***
+```
 [servers]
 server1 ansible_host=13.51.197.8
 server2 ansible_host=16.170.205.70
@@ -341,6 +341,6 @@ ansible_user=ubuntu
 ansible_ssh_private_key_file=/home/ubuntu/keys/ansible-demo
 ansible_python_interpreter=/usr/bin/python3
 ansible_host_key_checking=false
-***
+```
 
 ---
