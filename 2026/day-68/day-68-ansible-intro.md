@@ -364,3 +364,46 @@ ansible_host_key_checking=false
 ansible all -i inventory.ini -m ping
 ```
 
+### Task 5: Run Ad-Hoc Commands
+Ad-hoc commands let you run quick one-off tasks without writing a playbook.
+
+1. **Check uptime on all servers:**
+```bash
+ansible all -i inventory.ini -m command -a "uptime"
+```
+
+2. **Check free memory on web servers only:**
+```bash
+ansible web -i inventory.ini -m command -a "free -h"
+```
+
+3. **Check disk space on all servers:**
+```bash
+ansible all -i inventory.ini -m command -a "df -h"
+```
+
+4. **Install a package on the web group:**
+```bash
+ansible web -i inventory.ini -m yum -a "name=git state=present" --become
+```
+(Use `apt` instead of `yum` if running Ubuntu)
+
+5. **Copy a file to all servers:**
+```bash
+echo "Hello from Ansible" > hello.txt
+ansible all -i inventory.ini -m copy -a "src=hello.txt dest=/tmp/hello.txt"
+```
+
+6. **Verify the file was copied:**
+```bash
+ansible all -i inventory.ini -m command -a "cat /tmp/hello.txt"
+```
+
+**Document:** What does `--become` do? When do you need it?
+```
+--become in Ansible is used to execute tasks with elevated privileges, typically as a root or another privileged user. It is similar to using sudo in Linux, where certain administrative actions require higher permissions than a normal user.
+When Ansible connects to a managed node, it usually logs in with a normal user like ubuntu. However, many operations such as installing packages, modifying system configuration files, managing services, or accessing restricted directories require root-level access. In such cases, --become allows Ansible to temporarily switch to a privileged user to perform those tasks.
+For example, if you try to install a package without --become, the task may fail due to permission issues. By adding --become, Ansible executes that task with elevated permissions and completes it successfully.
+In simple terms, --become is needed whenever the task requires administrative or root access on the target machine.
+```
+---
