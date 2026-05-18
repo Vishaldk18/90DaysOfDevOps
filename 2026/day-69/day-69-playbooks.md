@@ -212,3 +212,104 @@ Create `files/nginx.conf` with a basic Nginx config.
 Run the playbook:
 - First run: handler triggers because the config file is new
 - Second run: handler does NOT trigger because nothing changed
+
+
+### Task 5: Dry Run, Diff, and Verbosity
+Before running playbooks on production, always preview changes first.
+
+1. **Dry run (check mode)** -- shows what would change without changing anything:
+```bash
+ansible-playbook install-nginx.yml --check
+```
+
+2. **Diff mode** -- shows the actual file differences:
+```bash
+ansible-playbook nginx-config.yml --check --diff
+```
+
+3. **Verbosity** -- increase output detail for debugging:
+```bash
+ansible-playbook install-nginx.yml -v       # verbose
+ansible-playbook install-nginx.yml -vv      # more verbose
+ansible-playbook install-nginx.yml -vvv     # connection debugging
+```
+
+4. **Limit to specific hosts:**
+```bash
+ansible-playbook install-nginx.yml --limit web-server
+```
+
+5. **List what would be affected without running:**
+```bash
+ansible-playbook install-nginx.yml --list-hosts
+ansible-playbook install-nginx.yml --list-tasks
+```
+
+Why is `--check --diff` the most important flag combination for production use?
+### ✅ Interview Answer (in lines)
+
+The `--check --diff` flags are important for production use because they allow you to **preview changes before actually applying them**. The `--check` option runs the playbook in dry-run mode, meaning it shows what changes would be made without modifying the system. The `--diff` option complements this by displaying the exact differences between the current state and the proposed changes, such as changes in configuration files.
+
+Using both together helps prevent accidental misconfigurations by giving full visibility into what Ansible is about to change. This is especially critical in production environments where unintended changes can cause downtime or service disruptions. It improves safety, confidence, and auditability by allowing engineers to verify changes before execution.
+
+In simple terms, `--check --diff` helps you **validate and review changes safely before applying them in production systems**.
+
+---
+
+### Task 6: Multiple Plays in One Playbook
+Write `multi-play.yml` with separate plays for each server group:
+
+```yaml
+---
+- name: Configure web servers
+  hosts: web
+  become: true
+  tasks:
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+- name: Configure app servers
+  hosts: app
+  become: true
+  tasks:
+    - name: Install Node.js dependencies
+      yum:
+        name:
+          - gcc
+          - make
+        state: present
+    - name: Create app directory
+      file:
+        path: /opt/app
+        state: directory
+        mode: '0755'
+
+- name: Configure database servers
+  hosts: db
+  become: true
+  tasks:
+    - name: Install MySQL client
+      yum:
+        name: mysql
+        state: present
+    - name: Create data directory
+      file:
+        path: /var/lib/appdata
+        state: directory
+        mode: '0700'
+```
+
+Run it:
+```bash
+ansible-playbook multi-play.yml
+```
+
+Watch the output -- each play targets a different group, and tasks run only on the relevant hosts.
+---
