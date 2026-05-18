@@ -108,3 +108,61 @@ A play defines a set of tasks to be executed on a group of hosts, while a task r
 
 
 ---
+
+
+### Task 1: Your First Playbook
+```yaml
+- name: install essential-modules
+  hosts: web
+  become: true
+  tasks:
+   - name: install multiple packages
+     apt:
+       name:
+         - git
+         - curl
+         - wget
+         
+       state: present
+   - name: Ensure Nginx is running
+     service:
+       name: nginx
+       state: started
+       enabled: true
+   - name: Copy config file
+     copy:
+       src: files/app.conf
+       dest: /etc/app.conf
+       owner: root
+       group: root
+       mode: '0644'
+   - name: Create application directory
+     file:
+       path: /opt/myapp
+       state: directory
+       owner: ubuntu
+       mode: '0755'
+   - name: check disk space
+     command: df -h
+     register: disk_output
+   - name: print disk space
+     debug:
+       var: disk_output.stdout_lines
+
+   - name: count running processes
+     shell: ps aux | wc -l
+     register: process_count
+   - name: show process count
+     debug:
+       msg: "Total processes: {{ process_count.stdout}}"
+   - name: Set timezone in environment
+     lineinfile:
+       path: /etc/enviorment
+       line: 'TZ=Asia/Kolkata'
+       create: true
+```
+
+---
+What is the difference between command and shell? When should you use each?
+In Ansible, the command module is used to execute simple commands directly on the managed node without invoking a shell, which makes it more secure and efficient. It does not support shell-specific features like pipes, redirection, or environment variables. On the other hand, the shell module executes commands through a shell, allowing the use of these advanced features. Therefore, command should be used for simple and secure operations, while shell should be used only when shell functionalities are required.
+---
