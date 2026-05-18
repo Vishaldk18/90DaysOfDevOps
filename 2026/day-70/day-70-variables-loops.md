@@ -256,3 +256,64 @@ Run it and observe which tasks are skipped on which hosts.
 **Verify:** Are tasks correctly skipping on hosts that don't match the condition?
 
 ---
+
+### Task 5: Loops
+Create `loops-demo.yml`:
+
+```yaml
+---
+- name: Loops demo
+  hosts: all
+  become: true
+
+  vars:
+    users:
+      - name: deploy
+        groups: wheel
+      - name: monitor
+        groups: wheel
+      - name: appuser
+        groups: users
+
+    directories:
+      - /opt/app/logs
+      - /opt/app/config
+      - /opt/app/data
+      - /opt/app/tmp
+
+  tasks:
+    - name: Create multiple users
+      user:
+        name: "{{ item.name }}"
+        groups: "{{ item.groups }}"
+        state: present
+      loop: "{{ users }}"
+
+    - name: Create multiple directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ directories }}"
+
+    - name: Install multiple packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - curl
+        - unzip
+        - jq
+
+    - name: Print each user created
+      debug:
+        msg: "Created user {{ item.name }} in group {{ item.groups }}"
+      loop: "{{ users }}"
+```
+
+Run it and observe the loop output -- each iteration is shown separately.
+
+**Document:** What is the difference between `loop` and the older `with_items`? (hint: `loop` is the modern recommended syntax)
+
+---
