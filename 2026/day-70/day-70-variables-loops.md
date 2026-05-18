@@ -193,3 +193,66 @@ Run it and observe the facts printed for each host.
 In real-world playbooks, facts such as the operating system, hostname, IP address, memory, and CPU details are commonly used to make automation dynamic and adaptable. These facts allow playbooks to adjust configurations based on the system environment, ensuring compatibility, performance optimization, and scalability across different servers.
 
 ---
+
+### Task 4: Conditionals with when
+Tasks should not always run on every host. Use `when` to control execution.
+
+Create `conditional-demo.yml`:
+
+```yaml
+---
+- name: Conditional tasks demo
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Nginx (only on web servers)
+      yum:
+        name: nginx
+        state: present
+      when: "'web' in group_names"
+
+    - name: Install MySQL (only on db servers)
+      yum:
+        name: mysql-server
+        state: present
+      when: "'db' in group_names"
+
+    - name: Show warning on low memory hosts
+      debug:
+        msg: "WARNING: This host has less than 1GB RAM"
+      when: ansible_memtotal_mb < 1024
+
+    - name: Run only on Amazon Linux
+      debug:
+        msg: "This is an Amazon Linux machine"
+      when: ansible_distribution == "Amazon"
+
+    - name: Run only on Ubuntu
+      debug:
+        msg: "This is an Ubuntu machine"
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Run only in production
+      debug:
+        msg: "Production settings applied"
+      when: app_env == "production"
+
+    - name: Multiple conditions (AND)
+      debug:
+        msg: "Web server with enough memory"
+      when:
+        - "'web' in group_names"
+        - ansible_memtotal_mb >= 512
+
+    - name: OR condition
+      debug:
+        msg: "Either web or app server"
+      when: "'web' in group_names or 'app' in group_names"
+```
+
+Run it and observe which tasks are skipped on which hosts.
+
+**Verify:** Are tasks correctly skipping on hosts that don't match the condition?
+
+---
