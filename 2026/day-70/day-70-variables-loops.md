@@ -269,9 +269,9 @@ Create `loops-demo.yml`:
   vars:
     users:
       - name: deploy
-        groups: wheel
+        groups: sudo
       - name: monitor
-        groups: wheel
+        groups: sudo
       - name: appuser
         groups: users
 
@@ -297,7 +297,7 @@ Create `loops-demo.yml`:
       loop: "{{ directories }}"
 
     - name: Install multiple packages
-      yum:
+      apt:
         name: "{{ item }}"
         state: present
       loop:
