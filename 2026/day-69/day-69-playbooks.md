@@ -110,7 +110,7 @@ A play defines a set of tasks to be executed on a group of hosts, while a task r
 ---
 
 
-### Task 1: Your First Playbook
+### Task 3: Learn the Essential Modules
 ```yaml
 - name: install essential-modules
   hosts: web
@@ -165,3 +165,50 @@ A play defines a set of tasks to be executed on a group of hosts, while a task r
 What is the difference between command and shell? When should you use each?
 In Ansible, the command module is used to execute simple commands directly on the managed node without invoking a shell, which makes it more secure and efficient. It does not support shell-specific features like pipes, redirection, or environment variables. On the other hand, the shell module executes commands through a shell, allowing the use of these advanced features. Therefore, command should be used for simple and secure operations, while shell should be used only when shell functionalities are required.
 ```
+
+### Task 4: Handlers -- Restart Services Only When Needed
+Handlers are tasks that run only when triggered by a `notify`. This avoids unnecessary service restarts.
+
+Create `nginx-config.yml`:
+```yaml
+---
+- name: Configure Nginx with a custom config
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Deploy Nginx config
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Deploy custom index page
+      copy:
+        content: "<h1>Managed by Ansible</h1><p>Server: {{ inventory_hostname }}</p>"
+        dest: /var/www/html/index.html
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+```
+Create `files/nginx.conf` with a basic Nginx config.
+
+Run the playbook:
+- First run: handler triggers because the config file is new
+- Second run: handler does NOT trigger because nothing changed
