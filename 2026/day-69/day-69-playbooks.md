@@ -310,6 +310,7 @@ Run it:
 ```bash
 ansible-playbook multi-play.yml
 ```
-
+```
 Watch the output -- each play targets a different group, and tasks run only on the relevant hosts.
+```
 ---
