@@ -44,6 +44,93 @@ ansible-playbook variables-demo.yml -e "app_name=my-custom-app app_port=9090"
 
 ---
 
+### Task 2: group_vars and host_vars
+Variables should not live inside playbooks. Move them to dedicated files.
+
+Create this structure:
+```
+ansible-practice/
+  inventory.ini
+  ansible.cfg
+  group_vars/
+    all.yml
+    web.yml
+    db.yml
+  host_vars/
+    web-server.yml
+  playbooks/
+    site.yml
+```
+
+**`group_vars/all.yml`** -- applies to every host:
+```yaml
+---
+ntp_server: pool.ntp.org
+app_env: development
+common_packages:
+  - vim
+  - htop
+  - tree
+```
+
+**`group_vars/web.yml`** -- applies only to the web group:
+```yaml
+---
+http_port: 80
+max_connections: 1000
+web_packages:
+  - nginx
+```
+
+**`group_vars/db.yml`** -- applies only to the db group:
+```yaml
+---
+db_port: 3306
+db_packages:
+  - mysql-server
+```
+
+**`host_vars/web-server.yml`** -- applies only to this specific host:
+```yaml
+---
+max_connections: 2000
+custom_message: "This is the primary web server"
+```
+
+Write a playbook `site.yml` that uses these variables:
+```yaml
+---
+- name: Apply common config
+  hosts: all
+  become: true
+  tasks:
+    - name: Install common packages
+      yum:
+        name: "{{ common_packages }}"
+        state: present
+    - name: Show environment
+      debug:
+        msg: "Environment: {{ app_env }}"
+
+- name: Configure web servers
+  hosts: web
+  become: true
+  tasks:
+    - name: Show web config
+      debug:
+        msg: "HTTP port: {{ http_port }}, Max connections: {{ max_connections }}"
+    - name: Show host-specific message
+      debug:
+        msg: "{{ custom_message }}"
+```
+
+Run it and observe which variables apply to which hosts.
+
+**Document:** What is the variable precedence? (hint: host_vars > group_vars > playbook vars, and `-e` overrides everything)
+
+---
+
+
 ### Task 3: Ansible Facts -- Gathering System Information
 Ansible automatically collects "facts" about each managed node -- OS, IP, memory, CPU, disks, and hundreds more.
 
