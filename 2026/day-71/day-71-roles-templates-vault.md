@@ -270,3 +270,52 @@ ansible-playbook site.yml
 **Verify:** Curl the web server. Does the custom page load?
 
 ---
+
+### Task 4: Ansible Galaxy -- Use Community Roles
+Ansible Galaxy is a marketplace of pre-built roles.
+
+1. **Search for roles:**
+```bash
+ansible-galaxy search nginx --platforms EL
+ansible-galaxy search mysql
+```
+
+2. **Install a role from Galaxy:**
+```bash
+ansible-galaxy install geerlingguy.docker
+```
+
+3. **Check where it was installed:**
+```bash
+ansible-galaxy list
+```
+
+4. **Use the installed role** -- create `docker-setup.yml`:
+```yaml
+---
+- name: Install Docker using Galaxy role
+  hosts: app
+  become: true
+  roles:
+    - geerlingguy.docker
+```
+
+Run it -- Docker gets installed with a single role call.
+
+5. **Use a requirements file** for managing multiple roles. Create `requirements.yml`:
+```yaml
+---
+roles:
+  - name: geerlingguy.docker
+    version: "7.4.1"
+  - name: geerlingguy.ntp
+```
+
+Install all at once:
+```bash
+ansible-galaxy install -r requirements.yml
+```
+
+**Document:** Why use a `requirements.yml` instead of installing roles manually?
+requirements.yml is used to manage and version-control role dependencies, ensuring consistent and automated setup across environments, unlike manual installation which is error-prone and not reproducible.
+---
