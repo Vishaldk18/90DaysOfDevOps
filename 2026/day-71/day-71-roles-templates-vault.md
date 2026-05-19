@@ -129,3 +129,144 @@ If you want a one-liner:
 > “Defaults are user-configurable with lowest priority, while vars are fixed role variables with higher priority.”
 
 ---
+### Task 3: Build a Custom Webserver Role
+Build a complete `webserver` role from scratch:
+
+**`roles/webserver/defaults/main.yml`:**
+```yaml
+---
+http_port: 80
+app_name: myapp
+max_connections: 512
+```
+
+**`roles/webserver/tasks/main.yml`:**
+```yaml
+---
+- name: Install Nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: Deploy Nginx config
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Deploy vhost config
+  template:
+    src: vhost.conf.j2
+    dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+    owner: root
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Create web root
+  file:
+    path: "/var/www/{{ app_name }}"
+    state: directory
+    mode: '0755'
+
+- name: Deploy index page
+  template:
+    src: index.html.j2
+    dest: "/var/www/{{ app_name }}/index.html"
+    mode: '0644'
+
+- name: Start and enable Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: true
+```
+
+**`roles/webserver/handlers/main.yml`:**
+```yaml
+---
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
+```
+
+**`roles/webserver/templates/index.html.j2`:**
+```html
+<h1>{{ app_name }}</h1>
+<p>Server: {{ ansible_hostname }}</p>
+<p>IP: {{ ansible_default_ipv4.address }}</p>
+<p>Environment: {{ app_env | default('development') }}</p>
+<p>Managed by Ansible</p>
+```
+
+Create the `vhost.conf.j2` and `nginx.conf.j2` templates yourself based on what you learned in Task 1.
+`vhost.conf.j2`
+```yaml
+server {
+    listen {{ http_port }};
+    server_name localhost;
+
+    root /var/www/{{ app_name }};
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+    }
+}
+```
+
+`nginx.conf.j2`
+```yaml
+user nginx;
+worker_processes auto;
+
+events {
+    worker_connections {{ max_connections }};
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout 65;
+
+    # Logging
+    access_log  /var/log/nginx/access.log;
+    error_log   /var/log/nginx/error.log;
+
+    # Include all vhost configs
+    include /etc/nginx/conf.d/*.conf;
+}
+```
+
+
+Now call the role from a playbook `site.yml`:
+```yaml
+---
+- name: Configure web servers
+  hosts: web
+  become: true
+  roles:
+    - role: webserver
+      vars:
+        app_name: terraweek
+        http_port: 80
+```
+
+Run it:
+```bash
+ansible-playbook site.yml
+```
+
+**Verify:** Curl the web server. Does the custom page load?
+
+---
