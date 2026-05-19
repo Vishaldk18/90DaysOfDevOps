@@ -319,3 +319,69 @@ ansible-galaxy install -r requirements.yml
 **Document:** Why use a `requirements.yml` instead of installing roles manually?
 requirements.yml is used to manage and version-control role dependencies, ensuring consistent and automated setup across environments, unlike manual installation which is error-prone and not reproducible.
 ---
+
+### Task 5: Ansible Vault -- Encrypt Secrets
+Never put passwords, API keys, or tokens in plain text. Ansible Vault encrypts sensitive data.
+
+1. **Create an encrypted file:**
+```bash
+ansible-vault create group_vars/db/vault.yml
+```
+It will ask for a vault password, then open an editor. Add:
+```yaml
+vault_db_password: SuperSecretP@ssw0rd
+vault_db_root_password: R00tP@ssw0rd123
+vault_api_key: sk-abc123xyz789
+```
+Save and exit. Open the file with `cat` -- it is fully encrypted.
+
+2. **Edit an encrypted file:**
+```bash
+ansible-vault edit group_vars/db/vault.yml
+```
+
+3. **View without editing:**
+```bash
+ansible-vault view group_vars/db/vault.yml
+```
+
+4. **Encrypt an existing file:**
+```bash
+ansible-vault encrypt group_vars/db/secrets.yml
+```
+
+5. **Use vault variables in a playbook** -- create `db-setup.yml`:
+```yaml
+---
+- name: Configure database
+  hosts: db
+  become: true
+
+  tasks:
+    - name: Show DB password (never do this in production)
+      debug:
+        msg: "DB password is set: {{ vault_db_password | length > 0 }}"
+```
+
+Run with the vault password:
+```bash
+ansible-playbook db-setup.yml --ask-vault-pass
+```
+6. **Use a password file** (better for CI/CD):
+```bash
+echo "YourVaultPassword" > .vault_pass
+chmod 600 .vault_pass
+echo ".vault_pass" >> .gitignore
+
+ansible-playbook db-setup.yml --vault-password-file .vault_pass
+```
+
+Or set it in `ansible.cfg`:
+```ini
+[defaults]
+vault_password_file = .vault_pass
+```
+
+**Document:** Why is `--vault-password-file` better than `--ask-vault-pass` for automated pipelines?
+--vault-password-file is preferred in automated pipelines because it allows non-interactive execution, ensuring secure and consistent handling of vault secrets without requiring manual input, unlike --ask-vault-pass.
+---
