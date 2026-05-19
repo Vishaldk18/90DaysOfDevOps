@@ -70,3 +70,62 @@ ansible-playbook template-demo.yml --diff
 **Verify:** SSH into the web server and read the generated config. Are the variables replaced with actual values?
 
 ---
+
+### Task 2: Understand the Role Structure
+An Ansible role has a fixed directory structure. Each directory has a specific purpose:
+
+```
+roles/
+  webserver/
+    tasks/
+      main.yml         # The main task list
+    handlers/
+      main.yml         # Handlers (restart services, etc.)
+    templates/
+      nginx.conf.j2    # Jinja2 templates
+    files/
+      index.html       # Static files to copy
+    vars/
+      main.yml         # Role variables (high priority)
+    defaults/
+      main.yml         # Default variables (low priority, easily overridden)
+    meta/
+      main.yml         # Role metadata and dependencies
+```
+
+Every directory contains a `main.yml` that Ansible loads automatically. You only create the directories you need.
+
+Generate a skeleton with:
+```bash
+ansible-galaxy init roles/webserver
+```
+
+Explore the generated directory. Read the README.md that Galaxy creates.
+
+**Document:** What is the difference between `vars/main.yml` and `defaults/main.yml`?
+Here’s a **crisp interview-ready answer**:
+
+***
+
+In Ansible roles, both `defaults/main.yml` and `vars/main.yml` are used to define variables, but they differ mainly in **precedence and purpose**.
+
+*   **`defaults/main.yml`** contains variables with the **lowest precedence**. These are meant to provide **default values** that users can easily override from inventory, playbooks, or extra vars. It is best used for **configurable parameters**.
+
+*   **`vars/main.yml`** contains variables with a **higher precedence**. These are harder to override and are typically used for **internal role variables** that should remain constant.
+
+✅ **In short:**
+
+*   `defaults` → flexible, user-overridable
+*   `vars` → strict, internal use, harder to override
+
+***
+
+👉 **Best practice:** Use `defaults/main.yml` in most cases, and only use `vars/main.yml` when you don’t want the value to be changed.
+
+***
+
+If you want a one-liner:
+
+> “Defaults are user-configurable with lowest priority, while vars are fixed role variables with higher priority.”
+
+---
