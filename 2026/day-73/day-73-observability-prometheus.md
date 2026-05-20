@@ -255,3 +255,274 @@ A **gauge** is a metric that **can go up and down**, representing the current va
 
 ***
 ---
+
+
+### Task 4: Learn PromQL Basics
+
+***
+
+# ✅ 1. What is PromQL (in simple words)
+
+PromQL is the language used to **query metrics in Prometheus**.
+
+👉 Think of it like:
+
+*   SQL → for databases
+*   PromQL → for metrics
+
+You use it to ask questions like:
+
+*   Is my service running?
+*   How fast are requests coming?
+*   Which service is slow?
+
+***
+
+# ✅ 2. Types of Data in Prometheus (VERY IMPORTANT)
+
+Prometheus works mainly with **time-series data**.
+
+### 🔹 Instant Vector
+
+👉 Current value at this moment
+
+Example:
+
+```promql
+up
+```
+
+✅ Output:
+
+    1 = service is up  
+    0 = service is down
+
+✔ It shows the **latest value only**
+
+***
+
+### 🔹 Range Vector
+
+👉 Values over a time period
+
+Example:
+
+```promql
+prometheus_http_requests_total[5m]
+```
+
+✅ Output:
+
+*   All data points from last 5 minutes
+
+✔ Not just one value → multiple values
+
+***
+
+# ✅ 3. Understanding the Base Metric
+
+    prometheus_http_requests_total
+
+👉 This is a **counter metric**
+
+### 🔹 What is a Counter?
+
+*   Always increases
+*   Tracks total events
+
+Example:
+
+    Time     Value
+    10:00    100
+    10:01    120
+    10:02    150
+
+👉 It never decreases
+
+***
+
+# ✅ 4. Why We Need rate()
+
+Problem:
+👉 Counter keeps increasing → not useful directly
+
+We want:
+👉 “How fast requests are happening NOW”
+
+***
+
+### 🔹 rate() Function
+
+    rate(metric[time])
+
+👉 Converts counter → **per-second rate**
+
+***
+
+### ✅ Example
+
+    rate(prometheus_http_requests_total[5m])
+
+👉 Meaning:
+
+> “How many requests per second in last 5 minutes?”
+
+***
+
+# ✅ 5. Label Filtering (Very Important)
+
+Metrics have labels like this:
+
+    prometheus_http_requests_total{method="GET", code="200"}
+
+***
+
+### 🔹 Filter Example
+
+✅ Only success:
+
+```promql
+prometheus_http_requests_total{code="200"}
+```
+
+✅ Only errors:
+
+```promql
+prometheus_http_requests_total{code!="200"}
+```
+
+👉 This removes HTTP 200 (OK)
+
+***
+
+# ✅ 6. Aggregation (sum)
+
+If you have multiple instances:
+
+    instance=server1
+    instance=server2
+
+Without sum:
+👉 You get separate values
+
+With sum:
+
+```promql
+sum(rate(prometheus_http_requests_total[5m]))
+```
+
+👉 Combine everything into one value
+
+***
+
+# ✅ 7. Arithmetic Operations
+
+Example:
+
+```promql
+process_resident_memory_bytes / 1024 / 1024
+```
+
+👉 Converts:
+
+*   Bytes → KB → MB
+
+***
+
+# ✅ 8. Top-K Query
+
+    topk(5, prometheus_http_requests_total)
+
+👉 Shows:
+
+*   Top 5 highest values
+
+***
+
+# ✅ 9. Now Combine Everything (Final Concept)
+
+We want:
+
+👉 “Rate of error requests (non-200) in last 5 min”
+
+***
+
+### Step-by-step:
+
+#### Step 1 → Base metric
+
+    prometheus_http_requests_total
+
+#### Step 2 → Filter errors
+
+    prometheus_http_requests_total{code!="200"}
+
+#### Step 3 → Time window
+
+    prometheus_http_requests_total{code!="200"}[5m]
+
+#### Step 4 → Convert to rate
+
+    rate(prometheus_http_requests_total{code!="200"}[5m])
+
+***
+
+# ✅ Final Query
+
+```promql
+rate(prometheus_http_requests_total{code!="200"}[5m])
+```
+
+***
+
+# ✅ What Happens Internally
+
+Let’s say:
+
+| Time  | Error Requests |
+| ----- | -------------- |
+| 10:00 | 100            |
+| 10:05 | 160            |
+
+👉 Increase = 60 requests
+
+Time = 300 seconds
+
+    rate = 60 / 300 = 0.2 req/sec
+
+***
+
+# ✅ Visual Understanding
+
+    Counter (raw):
+    100 → 150 → 200 → 260
+
+    Rate:
+    0.1 → 0.2 → 0.3 req/sec
+
+***
+
+# ✅ Full Flow Summary
+
+    Metric → Filter → Time Range → Function → Result
+       ↓         ↓         ↓           ↓
+    counter   errors     5m        rate()
+
+***
+
+# ✅ Bonus: Add sum (best practice in real world)
+
+```promql
+sum(rate(prometheus_http_requests_total{code!="200"}[5m]))
+```
+
+👉 Gives total error rate across all services
+
+***
+
+# ✅ Final Understanding in One Sentence
+
+> We take a counter metric, filter only errors, look at last 5 minutes, and convert it into per-second rate to understand how fast errors are happening.
+
+***
+---
