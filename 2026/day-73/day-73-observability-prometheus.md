@@ -526,3 +526,63 @@ sum(rate(prometheus_http_requests_total{code!="200"}[5m]))
 
 ***
 ---
+### Task 5: Add a Sample Application as a Scrape Target
+Prometheus needs something to monitor. Add a simple metrics-generating service.
+
+Update your `docker-compose.yml` to include a sample app that exposes Prometheus metrics:
+```yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+
+  notes-app:
+    image: trainwithshubham/notes-app:latest
+    container_name: notes-app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+```
+
+Update `prometheus.yml` to scrape the app:
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "notes-app"
+    static_configs:
+      - targets: ["notes-app:8000"]
+```
+
+Restart the stack:
+```bash
+docker compose up -d
+```
+
+Go back to Status > Targets. You should now see two targets. Generate some traffic to the app:
+```bash
+curl http://localhost:8000
+curl http://localhost:8000
+curl http://localhost:8000
+```
+
+**Note:** Not all applications expose Prometheus metrics natively. In later days you will learn how Node Exporter, cAdvisor, and OTEL Collector act as metric exporters for systems that do not have built-in Prometheus support.
+
+---
