@@ -582,7 +582,67 @@ curl http://localhost:8000
 curl http://localhost:8000
 curl http://localhost:8000
 ```
+---
 
-**Note:** Not all applications expose Prometheus metrics natively. In later days you will learn how Node Exporter, cAdvisor, and OTEL Collector act as metric exporters for systems that do not have built-in Prometheus support.
 
+### Task 6: Explore Data Retention and Storage
+Understand how Prometheus stores data:
+
+1. Check how much disk space Prometheus is using:
+```bash
+docker exec prometheus du -sh /prometheus
+```
+
+2. Prometheus stores data in a local time-series database (TSDB). Default retention is 15 days. You can change it:
+```yaml
+command:
+  - '--config.file=/etc/prometheus/prometheus.yml'
+  - '--storage.tsdb.retention.time=30d'
+  - '--storage.tsdb.retention.size=1GB'
+```
+
+3. Check the TSDB status in the UI: Status > TSDB Status
+
+**Document:** What happens when retention is exceeded? Why is a volume mount important for Prometheus data?
+## ✅ 1. What happens when retention is exceeded?
+
+**Interview Answer:**  
+When the configured retention period in Prometheus is exceeded, it **automatically deletes the oldest data blocks** to free up space and continue storing new metrics.
+
+👉 **Key Points to Mention:**
+
+*   Prometheus stores data in **time-based blocks**
+*   Retention is controlled using:
+    *   `--storage.tsdb.retention.time`
+    *   or `--storage.tsdb.retention.size`
+*   Old data is **permanently removed (not archived)**
+
+✅ **One-line:**
+
+> When retention is exceeded, Prometheus removes the oldest metrics data automatically to maintain storage limits.
+
+***
+
+## ✅ 2. Why is a volume mount important for Prometheus data?
+
+**Interview Answer:**  
+A volume mount is important because it allows Prometheus to **store its data outside the container**, ensuring that metrics are not lost when the container restarts or is deleted.
+
+👉 **Key Points to Mention:**
+
+*   Without volume → data stored inside container → lost on restart ❌
+*   With volume → data stored on host → persists ✅
+*   Critical for **production monitoring and historical data**
+
+✅ **One-line:**
+
+> A volume mount ensures data persistence by storing Prometheus metrics outside the container, preventing data loss during restarts or container removal.
+
+***
+
+## ✅ Best Short Combined Answer (For Interviews)
+
+> When retention is exceeded in Prometheus, the oldest data is automatically deleted to make space for new data. A volume mount is important because it persists Prometheus data outside the container, ensuring that metrics are not lost during restarts or container failures.
+
+***
 ---
