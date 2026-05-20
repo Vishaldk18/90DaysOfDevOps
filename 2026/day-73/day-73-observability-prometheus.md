@@ -1,4 +1,4 @@
-# Task 1
+# Task 1: Understand Observability
 ## ✅ 1. What is Observability?
 
 **Answer:**  
