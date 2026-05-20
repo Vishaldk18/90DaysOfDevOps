@@ -1,5 +1,5 @@
-### Task 1
-# ✅ 1. What is Observability?
+# Task 1
+## ✅ 1. What is Observability?
 
 **Answer:**  
 Observability is the ability to understand the internal state of a system by analyzing the data it generates, such as logs, metrics, and traces.
