@@ -1,9 +1,9 @@
-### Task 1: Understand OpenTelemetry
+# Task 1: Understand OpenTelemetry
 Here’s a **clear, interview-ready explanation** of all four concepts:
 
 ***
 
-# ✅ What is OpenTelemetry (OTel)?
+## ✅ What is OpenTelemetry (OTel)?
 
 **OpenTelemetry (OTel)** is an **open-source observability framework** used to collect and send telemetry data like:
 
