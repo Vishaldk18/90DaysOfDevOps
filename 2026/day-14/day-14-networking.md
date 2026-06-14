@@ -1,171 +1,385 @@
-Quick Concepts (write 1–2 bullets each)
-OSI layers (L1–L7) vs TCP/IP stack (Link, Internet, Transport, Application)
-Where IP, TCP/UDP, HTTP/HTTPS, DNS sit in the stack
-OSI layer           TCP IP 
-Application         
-presentation        Application  (HTTP/HTTPS)
-Session
-Transport           Transport    (TCP/UDP)
-Network             Internet     (IP/DNS)
-Data Link           Link
-Physical            
+# Linux Networking Fundamentals Notes
 
+## OSI Layers vs TCP/IP Stack
 
-curl command: 
-It is commonly used to send HTTP/HTTPS requests from the command line.
-curl is a command-line tool used to make API calls, download files, and interact with web services.
-curl is often used to test services inside clusters.
-curl http://localhost:8080 (Used to check if your pod/service is responding.)
-curl -I
-DevOps engineers use it to quickly check:
-If a website or API is reachable
-HTTP status code (200, 404, 500, etc.)
-Server headers
-Redirect behavior
+| OSI Model    | TCP/IP Model | Common Protocols            |
+| ------------ | ------------ | --------------------------- |
+| Application  | Application  | HTTP, HTTPS, DNS, FTP, SMTP |
+| Presentation | Application  | SSL/TLS, Encryption         |
+| Session      | Application  | Session Management          |
+| Transport    | Transport    | TCP, UDP                    |
+| Network      | Internet     | IP, ICMP                    |
+| Data Link    | Link         | Ethernet, MAC               |
+| Physical     | Link         | Cables, Switch Ports        |
 
+### Quick Concepts
 
-Hands-on Checklist (run these; add 1–2 line observations)
-Identity: hostname -I (or ip addr show) — note your IP.
-The hostname -I command is used to display the IP address(es) of the current machine.
-Shows all network interface IP addresses assigned to the system.
-Displays local/private IPs (not the public internet IP).
+* **OSI Model** has 7 layers and is mainly used for learning and troubleshooting.
+* **TCP/IP Model** has 4 layers and is the practical networking model used on the Internet.
 
+### Protocol Placement
+
+| Protocol       | Layer            |
+| -------------- | ---------------- |
+| HTTP/HTTPS     | Application      |
+| DNS            | Application      |
+| TCP/UDP        | Transport        |
+| IP             | Internet/Network |
+| Ethernet       | Data Link        |
+| Physical Media | Physical         |
+
+---
+
+# curl Command
+
+## What is curl?
+
+`curl` is a command-line tool used to:
+
+* Send HTTP/HTTPS requests
+* Make API calls
+* Download files
+* Test web services
+* Troubleshoot applications
+
+### Examples
+
+Check if a service is responding:
+
+```bash
+curl http://localhost:8080
+```
+
+Display HTTP headers only:
+
+```bash
+curl -I https://example.com
+```
+
+### Why DevOps Engineers Use curl
+
+* Verify website availability
+* Check API responses
+* View HTTP status codes
+* Inspect server headers
+* Test redirects
+
+---
+
+# Hands-on Checklist
+
+## 1. Identity Check
+
+### Command
+
+```bash
+hostname -I
+```
+
+### Observation
+
+* Displays all IP addresses assigned to the host.
+* Shows private/local IP addresses.
+
+### Alternative
+
+```bash
 ip addr show
-Shows full network interface details along with private ips
-
-
-curl ifconfig.me: ifconfig.me is a web service used to check your public IP address from the terminal or browser.
-
-ping: ping is a network troubleshooting command used to check if a host is reachable and measure network latency.
-The ping command is used to test connectivity between your machine and another host (server, website, or IP address).
-It checks whether the destination is reachable over the network.
-
-
-
-Path: traceroute <target> (or tracepath) — note any long hops/timeouts.
-The traceroute command is used to trace the path that packets take from your machine to a destination server.
-It shows all the intermediate routers (hops) between the source and the destination.
-Each line shows:
-Hop number
-Router IP
-Latency time
-
-Ports: ss -tulpn (or netstat -tulpn) — list one listening service and its port.
-netstat -tulpn → shows listening ports and services
-netstat -an | head -n 20 : is used to display the first few lines of network connections.
-| Option | Meaning                                             |
-| ------ | --------------------------------------------------- |
-| `-a`   | Show all connections (listening + non-listening)    |
-| `-n`   | Show numeric IP addresses and ports (no DNS lookup) |
-
-
-ss -tulpn → modern faster alternative for the same task
-Very common debugging step:
-ss -tulpn | grep <port>
-Used to check which process is using a port.
-
-Name resolution: dig <domain> or nslookup <domain> — record the resolved IP.
-Both dig and nslookup are DNS lookup tools used to check how a domain name resolves to an IP address.
-They help troubleshoot DNS issues.
-dig → advanced DNS debugging tool
-nslookup → simple DNS query tool
-Both help convert domain names to IP addresses.
-
-
-When you type a URL like google.com in the browser:
-The browser checks its cache for the IP address.
-If not found, the OS cache is checked.
-If still not found, a DNS query is sent to the DNS resolver (like ISP DNS or Google DNS 8.8.8.8).
-The DNS resolver performs a lookup by contacting:
-Root DNS server
-TLD DNS server (.com)
-Authoritative DNS server
-Then it returns the IP address of the server.
-The browser uses that IP to establish a TCP connection with the server.
-If it is HTTPS, a TLS/SSL handshake happens for a secure connection.
-The browser sends an HTTP request to the server.
-The server responds with HTML, CSS, and JavaScript, and the browser renders the webpage.
-
-✅ Short interview answer:
-The browser first checks cache. If the IP is not found, it queries a DNS resolver which contacts root, TLD, and authoritative DNS servers to get the server’s IP address. Then the browser establishes a TCP/HTTPS connection, sends an HTTP request, and the server returns the webpage which the browser renders.
-
-
-nc -zv localhost <port>
-nc (netcat) command, the options -zv are used together to scan/check if a port is open.
-| Option | Meaning                                            |
-| ------ | -------------------------------------------------- |
-| `-z`   | Zero-I/O mode (scan the port without sending data) |
-| `-v`   | Verbose mode (show detailed output)                |
-
-
-### One-line check
-
-**Use `ping <host>`** → If reachable, host is up. If not reachable, next check **service status and firewall/security rules**.
-
----
-
-# Reflection
-
-### 1️⃣ Which command gives the fastest signal when something is broken?
-
-**`curl -I <url>`**
-
-It quickly shows:
-
-* HTTP status
-* Server response
-* If the application is reachable
-
-Example:
-
-```bash
-curl -I http://example.com
 ```
 
----
+### Observation
 
-### 2️⃣ What layer would you inspect next?
-
-| Issue          | Layer to Inspect                       |
-| -------------- | -------------------------------------- |
-| DNS fails      | **Application layer (DNS)**            |
-| HTTP 500 error | **Application layer (Web/App server)** |
-
-Explanation:
-
-* **DNS failure** → problem in DNS resolution system
-* **HTTP 500** → application/server error (backend issue)
+* Shows network interfaces.
+* Displays detailed IP configuration.
 
 ---
 
-### 3️⃣ Two follow-up checks in a real incident
+## 2. Public IP Check
 
-**1️⃣ Check service status**
+### Command
 
 ```bash
-systemctl status nginx
+curl ifconfig.me
 ```
 
-**2️⃣ Check listening ports**
+### Observation
+
+* Returns the public IP address visible on the Internet.
+
+---
+
+## 3. Connectivity Check
+
+### Command
+
+```bash
+ping google.com
+```
+
+### Observation
+
+* Verifies host reachability.
+* Measures latency and packet loss.
+
+### Purpose
+
+* Check whether a remote system is reachable.
+
+---
+
+## 4. Trace Network Path
+
+### Command
+
+```bash
+traceroute google.com
+```
+
+or
+
+```bash
+tracepath google.com
+```
+
+### Observation
+
+Shows:
+
+* Hop number
+* Router IP
+* Latency per hop
+
+### Purpose
+
+* Identify network delays and routing issues.
+
+---
+
+## 5. Check Open Ports
+
+### Modern Command
 
 ```bash
 ss -tulpn
 ```
 
-Other useful checks:
+### Legacy Command
+
+```bash
+netstat -tulpn
+```
+
+### Purpose
+
+* View listening ports
+* Identify services bound to ports
+* Determine which process owns a port
+
+### Check Specific Port
+
+```bash
+ss -tulpn | grep 8080
+```
+
+### netstat Example
+
+```bash
+netstat -an | head -n 20
+```
+
+#### Options
+
+| Option | Meaning                          |
+| ------ | -------------------------------- |
+| -a     | Show all connections             |
+| -n     | Show numeric addresses and ports |
+
+---
+
+## 6. DNS Resolution
+
+### Using dig
+
+```bash
+dig google.com
+```
+
+### Using nslookup
+
+```bash
+nslookup google.com
+```
+
+### Observation
+
+* Converts domain names into IP addresses.
+* Useful for troubleshooting DNS issues.
+
+### Tools Comparison
+
+| Tool     | Purpose                |
+| -------- | ---------------------- |
+| dig      | Advanced DNS debugging |
+| nslookup | Simple DNS queries     |
+
+---
+
+# What Happens When You Open google.com?
+
+1. Browser checks local cache.
+2. Operating system checks DNS cache.
+3. DNS request is sent to a DNS resolver.
+4. Resolver contacts:
+
+   * Root DNS Server
+   * TLD DNS Server (.com)
+   * Authoritative DNS Server
+5. IP address is returned.
+6. Browser establishes a TCP connection.
+7. HTTPS performs TLS/SSL handshake.
+8. Browser sends HTTP request.
+9. Server responds with HTML/CSS/JavaScript.
+10. Browser renders the webpage.
+
+### Interview Answer
+
+> The browser first checks cache. If the IP is not found, it queries a DNS resolver which contacts root, TLD, and authoritative DNS servers to get the server's IP address. Then the browser establishes a TCP/HTTPS connection, sends an HTTP request, and the server returns the webpage which the browser renders.
+
+---
+
+# Port Connectivity Check
+
+## netcat (nc)
+
+### Command
+
+```bash
+nc -zv localhost 80
+```
+
+### Options
+
+| Option | Meaning                        |
+| ------ | ------------------------------ |
+| -z     | Scan port without sending data |
+| -v     | Verbose output                 |
+
+### Purpose
+
+* Verify whether a port is open.
+* Check application accessibility.
+
+---
+
+# One-Line Health Check
+
+```bash
+ping <host>
+```
+
+### Interpretation
+
+* Reachable → Host is up.
+* Not reachable → Check service status, firewall, security groups, or routing.
+
+---
+
+# Reflection
+
+## 1. Which Command Gives the Fastest Signal When Something Is Broken?
+
+### Answer
+
+```bash
+curl -I <url>
+```
+
+### Why?
+
+Quickly shows:
+
+* HTTP status code
+* Server response
+* Application availability
+
+### Example
+
+```bash
+curl -I https://example.com
+```
+
+---
+
+## 2. What Layer Would You Inspect Next?
+
+| Issue          | Layer                                      |
+| -------------- | ------------------------------------------ |
+| DNS failure    | Application Layer (DNS)                    |
+| HTTP 500 error | Application Layer (Web/Application Server) |
+
+### Explanation
+
+#### DNS Failure
+
+* Domain cannot resolve to an IP.
+* Investigate DNS servers and records.
+
+#### HTTP 500 Error
+
+* Indicates application/backend failure.
+* Investigate application logs and server health.
+
+---
+
+## 3. Two Follow-Up Checks During an Incident
+
+### Check Service Status
+
+```bash
+systemctl status nginx
+```
+
+### Check Listening Ports
+
+```bash
+ss -tulpn
+```
+
+### Additional Useful Checks
 
 ```bash
 dig domain.com
+
 nc -zv host 80
 ```
 
 ---
 
-✅ **Simple troubleshooting flow (DevOps)**
+# DevOps Troubleshooting Flow
 
+```text
+ping
+  ↓
+DNS Check (dig/nslookup)
+  ↓
+Port Check (nc)
+  ↓
+HTTP Check (curl)
 ```
-ping → DNS check (dig) → port check (nc) → HTTP check (curl)
-```
 
-This helps quickly identify if the issue is **network, DNS, port, or application.**
+### Purpose
 
+This workflow quickly helps determine whether the problem is related to:
+
+* Network Connectivity
+* DNS Resolution
+* Port Availability
+* Application Health
+
+---
+
+# Key Takeaways
+
+1. OSI and TCP/IP models help identify where networking issues occur.
+2. Tools like `ping`, `curl`, `dig`, `ss`, and `nc` are essential for troubleshooting.
+3. A structured troubleshooting approach saves time during production incidents.
