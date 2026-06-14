@@ -1,7 +1,3 @@
-Here you go — a clean, well‑organized documentation of each essential Linux directory, **including real `ls -l` examples retrieved from the system**, plus a simple sentence on when you would use each one.
-
-***
-
 # 📁 **Core Directories (Must Know)**
 
 ***
