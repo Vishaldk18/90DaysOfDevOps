@@ -381,31 +381,6 @@ sudo chown nairobi:vault-team bank-heist/escape-plan.txt
 
 ls -l bank-heist
 ```
-
----
-
-# Screenshots
-
-Add screenshots for:
-
-1. Initial ownership using `ls -l`
-2. `chown` owner changes
-3. `chgrp` group changes
-4. Combined owner and group changes
-5. Recursive ownership using `chown -R`
-6. Final ownership of files inside `bank-heist`
-7. Output of `ls -lR heist-project`
-
----
-
-# What I Learned
-
-1. Every file and directory in Linux has an owner and a group.
-2. `chown` is used to change ownership, while `chgrp` changes group ownership.
-3. Recursive ownership changes using `chown -R` are useful when managing entire application directories.
-
----
-
 # Conclusion
 
 Successfully practiced Linux file ownership management using `chown`, `chgrp`, and recursive ownership changes. These concepts are essential for DevOps tasks such as deployments, shared directories, CI/CD artifacts, and log management.
