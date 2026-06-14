@@ -381,6 +381,3 @@ sudo chown nairobi:vault-team bank-heist/escape-plan.txt
 
 ls -l bank-heist
 ```
-# Conclusion
-
-Successfully practiced Linux file ownership management using `chown`, `chgrp`, and recursive ownership changes. These concepts are essential for DevOps tasks such as deployments, shared directories, CI/CD artifacts, and log management.
