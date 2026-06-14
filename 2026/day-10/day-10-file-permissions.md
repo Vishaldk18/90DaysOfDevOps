@@ -319,29 +319,4 @@ ls -ld project
 
 ---
 
-## Screenshots
-
-Add screenshots for:
-
-1. File creation
-2. Initial permissions using ls -l
-3. Reading files with cat, head, and tail
-4. Executing script.sh
-5. Permission changes with chmod
-6. Directory permissions
-7. Permission denied errors
-
----
-
-## What I Learned
-
-1. Linux permissions are divided into Owner, Group, and Others.
-2. The chmod command is used to control read, write, and execute permissions.
-3. Execute permission is required to run scripts, while write permission is required to modify files.
-
----
-
-## Conclusion
-
-Successfully created files, viewed contents, modified permissions using chmod, executed scripts, and tested permission restrictions. This exercise helped reinforce Linux file management and permission concepts used daily in DevOps and System Administration.
 
