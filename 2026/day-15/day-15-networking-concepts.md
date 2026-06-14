@@ -1,101 +1,277 @@
-Task 1: DNS – How Names Become IPs
-Explain in 3–4 lines: what happens when you type google.com in a browser?
-When you type a URL like google.com in the browser: The browser checks its cache for the IP address. If not found, the OS cache is checked. If still not found, a DNS query is sent to the DNS resolver (like ISP DNS or Google DNS 8.8.8.8). The DNS resolver performs a lookup by contacting: Root DNS server TLD DNS server (.com) Authoritative DNS server Then it returns the IP address of the server. The browser uses that IP to establish a TCP connection with the server. If it is HTTPS, a TLS/SSL handshake happens for a secure connection. The browser sends an HTTP request to the server. The server responds with HTML, CSS, and JavaScript, and the browser renders the webpage.
+# Networking Fundamentals – DNS, IP Addressing, CIDR & Ports
+# Task 1: DNS – How Names Become IPs
 
-✅ Short interview answer: The browser first checks cache. If the IP is not found, it queries a DNS resolver which contacts root, TLD, and authoritative DNS servers to get the server’s IP address. Then the browser establishes a TCP/HTTPS connection, sends an HTTP request, and the server returns the webpage which the browser renders.
+## What Happens When You Type google.com in a Browser?
 
+When you type a URL such as **google.com**, the browser first checks its local cache for the IP address. If not found, the operating system cache is checked. If the address is still not available, a DNS query is sent to a DNS resolver (such as Google DNS 8.8.8.8 or an ISP DNS server).
 
-What are these record types? Write one line each:
-A, AAAA, CNAME, MX, NS
-A record maps a domain to an IPv4 address, 
-AAAA maps to IPv6, 
-CNAME creates an alias for another domain, 
-MX defines the mail server for a domain, 
-and NS specifies the DNS servers responsible for that domain.
-Run: dig google.com — identify the A record and TTL from the output
+The DNS resolver contacts:
 
+1. Root DNS Server
+2. TLD DNS Server (.com)
+3. Authoritative DNS Server
 
-Task 2: IP Addressing
-What is an IPv4 address? How is it structured? (e.g., 192.168.1.10)
-An IPv4 address is a 32-bit numerical address used to identify devices on a network. It is written in dotted decimal format consisting of four octets, each ranging from 0–255.
+The resolver returns the IP address. The browser then establishes a TCP connection to the server, performs a TLS/SSL handshake if HTTPS is used, sends an HTTP request, and receives the webpage content.
 
-Difference between public and private IPs — give one example of each
-A public IP is globally unique and reachable on the internet, while a private IP is used inside internal networks like homes, offices, or cloud VPCs and is not directly accessible from the internet.
-| Type           | Description                  | Example        |
-| -------------- | ---------------------------- | -------------- |
-| **Public IP**  | Accessible over the internet | `8.8.8.8`      |
-| **Private IP** | Used inside local networks   | `192.168.1.10` |
+### Interview Answer
 
+> The browser first checks cache. If the IP is not found, it queries a DNS resolver which contacts root, TLD, and authoritative DNS servers to get the server's IP address. Then the browser establishes a TCP/HTTPS connection, sends an HTTP request, and the server returns the webpage which the browser renders.
 
-What are the private IP ranges?
-10.x.x.x, 172.16.x.x – 172.31.x.x, 192.168.x.x
-10.0.0.0/8, 172.16.0.0–172.31.255.255, and 192.168.0.0/16.
-Run: ip addr show — identify which of your IPs are private
+---
 
-Task 3: CIDR & Subnetting
-What does /24 mean in 192.168.1.0/24?
-/24 is the CIDR prefix that indicates how many bits are used for the network part of the IP address.
-/24 → 24 bits for network
-     8 bits for hosts
-     
-How many usable hosts in a /24? A /16? A /28?
-2^8 = 256 -2 = 254
-2^16 = 65536 -2 = 65534
-2^4 = 16 - 2 = 14
+## DNS Record Types
 
+| Record Type | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| A           | Maps a domain name to an IPv4 address                      |
+| AAAA        | Maps a domain name to an IPv6 address                      |
+| CNAME       | Creates an alias pointing to another domain name           |
+| MX          | Specifies the mail server responsible for receiving emails |
+| NS          | Specifies the authoritative DNS servers for a domain       |
 
-Explain in your own words: why do we subnet?
-Subnetting divides a large network into smaller networks to improve network management, security, and efficient IP usage.
+### Example
 
-Benefits:
-Better network organization
-Reduced broadcast traffic
-Improved security and isolation
-Efficient IP address allocation
+```bash
+dig google.com
+```
 
-Example in cloud:
-Public subnet
-Private subnet
-Database subnet
+### Sample Output
 
-Quick exercise — fill in:
+```text
+google.com.     300     IN      A       142.250.183.14
+```
+
+* **A Record:** 142.250.183.14
+* **TTL:** 300 seconds
+
+---
+
+# Task 2: IP Addressing
+
+## What is an IPv4 Address?
+
+An IPv4 address is a 32-bit numerical address used to identify devices on a network.
+
+Example:
+
+```text
+192.168.1.10
+```
+
+It consists of four octets separated by dots, where each octet ranges from 0–255.
+
+---
+
+## Public vs Private IP Address
+
+A public IP is globally unique and reachable over the Internet, while a private IP is used within internal networks and is not directly accessible from the Internet.
+
+| Type       | Description                  | Example      |
+| ---------- | ---------------------------- | ------------ |
+| Public IP  | Accessible over the Internet | 8.8.8.8      |
+| Private IP | Used inside local networks   | 192.168.1.10 |
+
+---
+
+## Private IP Address Ranges
+
+```text
+10.0.0.0/8
+172.16.0.0 – 172.31.255.255
+192.168.0.0/16
+```
+
+Equivalent shorthand:
+
+```text
+10.x.x.x
+172.16.x.x – 172.31.x.x
+192.168.x.x
+```
+
+---
+
+## Check Your IP Addresses
+
+```bash
+ip addr show
+```
+
+### Observation
+
+Private IPs generally fall into:
+
+* 10.x.x.x
+* 172.16.x.x – 172.31.x.x
+* 192.168.x.x
+
+---
+
+# Task 3: CIDR & Subnetting
+
+## What Does /24 Mean?
+
+Example:
+
+```text
+192.168.1.0/24
+```
+
+The `/24` indicates that the first 24 bits are used for the network portion of the address.
+
+```text
+24 bits = Network
+8 bits  = Host
+```
+
+---
+
+## Usable Hosts Calculation
+
+### /24 Network
+
+```text
+2^8 = 256
+256 - 2 = 254 usable hosts
+```
+
+### /16 Network
+
+```text
+2^16 = 65536
+65536 - 2 = 65534 usable hosts
+```
+
+### /28 Network
+
+```text
+2^4 = 16
+16 - 2 = 14 usable hosts
+```
+
+---
+
+## Why Do We Subnet?
+
+Subnetting divides a large network into smaller, manageable networks.
+
+### Benefits
+
+* Better network organization
+* Reduced broadcast traffic
+* Improved security and isolation
+* Efficient IP address allocation
+
+### Cloud Example
+
+* Public Subnet
+* Private Subnet
+* Database Subnet
+
+---
+
+## CIDR Reference Table
+
 | CIDR | Subnet Mask     | Total IPs | Usable Hosts |
 | ---- | --------------- | --------- | ------------ |
 | /24  | 255.255.255.0   | 256       | 254          |
 | /16  | 255.255.0.0     | 65536     | 65534        |
 | /28  | 255.255.255.240 | 16        | 14           |
 
+---
 
-Task 4: Ports – The Doors to Services
-What is a port? Why do we need them?
-A port is a logical communication endpoint on a device used by applications to send and receive network traffic.
-Since one server can run multiple services at the same time, ports help the operating system direct traffic to the correct service.
+# Task 4: Ports – The Doors to Services
 
-Example:
-A server may run SSH, a web server, and a database simultaneously. Each service listens on a different port.
+## What is a Port?
 
-| Port  | Service                    |
-| ----- | -------------------------- |
-| 22    | SSH (Secure Shell)         |
-| 80    | HTTP (Web traffic)         |
-| 443   | HTTPS (Secure web traffic) |
-| 53    | DNS (Domain Name System)   |
-| 3306  | MySQL Database             |
-| 6379  | Redis                      |
-| 27017 | MongoDB                    |
+A port is a logical communication endpoint used by applications to send and receive network traffic.
 
-Run ss -tulpn 
+Ports allow multiple services to run on the same machine simultaneously.
 
-A port is a logical communication endpoint that allows multiple services to run on the same machine. Each service listens on a specific port, such as SSH on port 22 and HTTP on port 80.
+### Example
 
-Task 5: Putting It Together
-Answer in 2–3 lines each:
+A server can run:
 
-**1️⃣ You run `curl http://myapp.com:8080` — what networking concepts are involved?**
-DNS resolves **myapp.com** to an IP address, then a **TCP connection** is established to **port 8080** on that server. After the connection, an **HTTP request** is sent and the server returns the response.
+* SSH
+* Web Server
+* Database
+
+Each service listens on a different port.
 
 ---
 
-**2️⃣ Your app can't reach a database at `10.0.1.50:3306` — what would you check first?**
-First check **network connectivity and port reachability** (ping or `nc -zv 10.0.1.50 3306`). Then verify the **database service is running and listening on port 3306** and ensure **firewall/security group rules allow the connection**.
+## Common Ports
 
+| Port  | Service |
+| ----- | ------- |
+| 22    | SSH     |
+| 80    | HTTP    |
+| 443   | HTTPS   |
+| 53    | DNS     |
+| 3306  | MySQL   |
+| 6379  | Redis   |
+| 27017 | MongoDB |
+
+---
+
+## Check Listening Ports
+
+```bash
+ss -tulpn
+```
+
+### Purpose
+
+* Show listening services
+* Display ports in use
+* Identify processes bound to ports
+
+### Example Output
+
+```text
+tcp LISTEN 0 128 0.0.0.0:22
+```
+
+This indicates SSH is listening on port 22.
+
+---
+
+## Interview Answer
+
+> A port is a logical communication endpoint that allows multiple services to run on the same machine. Each service listens on a specific port, such as SSH on port 22 and HTTP on port 80.
+
+---
+
+# Task 5: Putting It Together
+
+## 1. You Run curl http://myapp.com:8080 — What Networking Concepts Are Involved?
+
+DNS first resolves **myapp.com** to an IP address. A TCP connection is then established to **port 8080** on the target server. Once connected, an HTTP request is sent and the application returns a response.
+
+---
+
+## 2. Your App Cannot Reach a Database at 10.0.1.50:3306 — What Would You Check First?
+
+First verify network connectivity and port reachability:
+
+```bash
+nc -zv 10.0.1.50 3306
+```
+
+Then check:
+
+* Whether the database service is running
+* Whether it is listening on port 3306
+* Firewall rules
+* Security group rules
+* Network ACLs
+
+---
+
+# Key Takeaways
+
+1. DNS translates domain names into IP addresses.
+2. CIDR notation determines network and host allocation.
+3. Ports allow multiple services to communicate on the same server.
+4. Troubleshooting usually starts with DNS, connectivity, ports, and application checks.
+5. Commands such as `dig`, `ip addr`, `ss`, `ping`, `curl`, and `nc` are essential networking tools for DevOps engineers.
