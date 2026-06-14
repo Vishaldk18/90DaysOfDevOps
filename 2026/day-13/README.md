@@ -69,31 +69,3 @@ lvextend -L +200M /dev/devops-vg/app-data
 resize2fs /dev/devops-vg/app-data
 df -h /mnt/app-data
 ```
-
----
-
-## Documentation
-
-Create `day-13-lvm.md` with:
-- Commands used
-- Screenshots of outputs
-- What you learned (3 points)
-
----
-
-## Submission
-1. Add your `day-13-lvm.md` to `2026/day-13/`
-2. Commit and push
-
----
-
-## Learn in Public
-
-Share your LVM progress on LinkedIn.
-
-```
-#90DaysOfDevOps #DevOpsKaJosh #TrainWithShubham
-```
-
-Happy Learning!
-**TrainWithShubham**
