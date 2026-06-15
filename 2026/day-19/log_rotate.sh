@@ -30,7 +30,13 @@ directory_existence_check(){
 }
 directory_existence_check
 
-compress_older_log_files(){
- compressed=$(find $log_directory -name "*.log" -mtime +7 | wc -l)
- find $log_directory -name "*.log" -mtime +0 -exec gzip {} \;
+compress_older_log_files() {
+
+    compressed=$(find "$log_directory" -name "*.log" -mtime +7 | wc -l)
+
+    echo "Compressing $compressed log files..."
+
+    find "$log_directory" -name "*.log" -mtime +7 -exec gzip {} \;
+
 }
+compress_older_log_files
