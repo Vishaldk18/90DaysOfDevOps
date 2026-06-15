@@ -1,257 +1,462 @@
+# Bash Scripting Notes
+
+## Functions with Arguments
+
+### Example 1: Greeting and Sum Function
+
+```bash
 #!/bin/bash
 
 greet(){
-  #read -p "Enter your name:" name
   echo "Hello, $1"
 }
 
-
-
 sum(){
-  #read -p "Enter num1:" num1
-  #read -p "Enter num2:" num2
-
   echo "sum is: $(( $1 + $2 ))"
 }
 
 greet vishal
 sum 10 20
+```
 
+### Explanation
 
+* `$1`, `$2` represent positional arguments passed to a function.
+* `greet vishal` passes `vishal` as the first argument.
+* `sum 10 20` passes `10` and `20` as arguments.
+* Arithmetic operations can be performed using `$(( ))`.
 
+### Output
 
+```text
+Hello, vishal
+sum is: 30
+```
+
+---
+
+# System Information Functions
+
+## Example 2: Disk and Memory Check
+
+```bash
 #!/bin/bash
 
 check_disk(){
- 
-        used_disk=$(df -h / | awk 'NR==2 {print $2}' )
-        echo "Used disk: $used_disk"
-}
 
+    used_disk=$(df -h / | awk 'NR==2 {print $2}')
+    echo "Used disk: $used_disk"
+}
 
 check_memory(){
-        available_memory=$(free -h | awk 'NR==2 {print $4}')
-        echo "Avaialble memory: $available_memory"
+
+    available_memory=$(free -h | awk 'NR==2 {print $4}')
+    echo "Available memory: $available_memory"
 }
-
-
 
 check_memory
 check_disk
+```
 
+### Explanation
 
+#### Disk Usage
+
+```bash
+df -h /
+```
+
+Shows filesystem usage for root (`/`).
+
+```bash
+awk 'NR==2 {print $2}'
+```
+
+Prints the second column from the second row.
+
+#### Memory Usage
+
+```bash
+free -h
+```
+
+Displays memory usage in human-readable format.
+
+```bash
+awk 'NR==2 {print $4}'
+```
+
+Extracts available memory.
+
+---
+
+# Bash Strict Mode
+
+## Example 3: Safe Bash Scripting
+
+```bash
 #!/bin/bash
+
 set -euo pipefail
+```
 
-#set -u
-#echo $name
+### Meaning
 
-#set -e
-#cd kmmm
-#echo "welcome tho devops"
+#### `-e`
 
-#set -o pipefail
-#false | true
-#echo $?
-~          
--e → exit on error
--u → error on unset variables
-pipefail → pipelines fail correctly
-By default, Bash sets a pipeline’s exit status to the exit status of the last command only.
-This can hide failures earlier in the pipeline.
+Exit immediately if any command returns a non-zero status.
 
+```bash
+cd non_existing_directory
+echo "This line won't execute"
+```
 
+---
+
+#### `-u`
+
+Treat unset variables as errors.
+
+```bash
+echo $name
+```
+
+Produces:
+
+```text
+bash: name: unbound variable
+```
+
+---
+
+#### `pipefail`
+
+Makes the entire pipeline fail if any command in the pipeline fails.
+
+Example:
+
+```bash
+false | true
+```
+
+Without pipefail:
+
+```text
+Exit status = 0
+```
+
+With pipefail:
+
+```text
+Exit status = 1
+```
+
+### Why Use It?
+
+By default, Bash returns the exit code of the last command in a pipeline, which can hide failures earlier in the pipeline.
+
+---
+
+# Local Variables in Functions
+
+## Example 4: Local Scope
+
+```bash
 #!/bin/bash
- 
+
 demo_function() {
     local name="Vishal"
     echo "Inside function: $name"
 }
- 
+
 demo_function
- 
+
 echo "Outside function: $name"
+```
 
+### Output
 
+```text
+Inside function: Vishal
+Outside function:
+```
+
+### Explanation
+
+* `local` limits the variable scope to the function.
+* Outside the function, the variable is unavailable.
+
+---
+
+# Global Variables in Functions
+
+## Example 5: Global Scope
+
+```bash
 #!/bin/bash
- 
+
 demo_function() {
     name="Vishal"
     echo "Inside function: $name"
 }
- 
+
 demo_function
- 
+
 echo "Outside function: $name"
+```
 
+### Output
 
-many commands to get hostname and os info
-hostname - get hosname only
-uname - get kernel name
-uname -n - get hostname
-uname -a : get kernel,os,architecture,hostname and system info
-cat /etc/os-release: to info specific to os
-hostnamectl : shows hostname + os + kernel + architecutre
+```text
+Inside function: Vishal
+Outside function: Vishal
+```
 
+### Explanation
 
+Without `local`, variables become global and remain accessible after the function completes.
+
+---
+
+# Hostname and OS Information Commands
+
+## hostname
+
+```bash
+hostname
+```
+
+Displays only the hostname.
+
+---
+
+## uname
+
+```bash
+uname
+```
+
+Displays kernel name.
+
+---
+
+## uname -n
+
+```bash
+uname -n
+```
+
+Displays hostname.
+
+---
+
+## uname -a
+
+```bash
+uname -a
+```
+
+Displays:
+
+* Kernel version
+* Hostname
+* Architecture
+* Operating system information
+
+---
+
+## /etc/os-release
+
+```bash
+cat /etc/os-release
+```
+
+Displays Linux distribution-specific details.
+
+---
+
+## hostnamectl
+
+```bash
+hostnamectl
+```
+
+Displays:
+
+* Hostname
+* Operating System
+* Kernel Version
+* Architecture
+
+---
+
+# Top CPU Consuming Processes
+
+## Command
+
+```bash
 ps aux --sort=-%cpu | head -n 6
- 
-This command shows the top 5 CPU consuming processes in Linux.
- 
- 
----
- 
-1️⃣ ps
- 
-ps = Process Status
- 
-It displays information about running processes in the system.
- 
- 
----
- 
-2️⃣ a
- 
-Shows processes of all users that are attached to a terminal.
- 
- 
----
- 
-3️⃣ u
- 
-Displays output in user-oriented format with detailed columns like:
- 
-USER
- 
-PID
- 
-%CPU
- 
-%MEM
- 
-VSZ
- 
-RSS
- 
-START
- 
-TIME
- 
-COMMAND
- 
- 
- 
----
- 
-4️⃣ x
- 
-Includes processes without a terminal (TTY) such as:
- 
-system services
- 
-daemons
-Example: sshd, systemd, cron
- 
- 
-So ps aux shows almost all processes in the system.
- 
- 
----
- 
-5️⃣ --sort=-%cpu
- 
-Sorts the output based on CPU usage.
- 
-%cpu → CPU utilization column
- 
-- → descending order (highest first)
- 
- 
-So the process using maximum CPU appears at the top.
- 
- 
----
- 
-6️⃣ |
- 
-This is a pipe.
- 
-It sends the output of the first command (ps aux) to the next command (head).
- 
- 
----
- 
-7️⃣ head -n 6
- 
-Displays the first 6 lines.
- 
-Why 6?
- 
-1 line = header
- 
-5 lines = top 5 processes
+```
 
+### Purpose
 
+Shows the top 5 CPU-consuming processes.
 
- 
+---
+
+## Breakdown
+
+### 1. ps
+
+```bash
+ps
+```
+
+Process Status command.
+
+Displays running processes.
+
+---
+
+### 2. a
+
+Shows processes of all users attached to terminals.
+
+---
+
+### 3. u
+
+Displays detailed user-oriented output.
+
+Includes:
+
+* USER
+* PID
+* %CPU
+* %MEM
+* VSZ
+* RSS
+* START
+* TIME
+* COMMAND
+
+---
+
+### 4. x
+
+Shows processes without terminals.
+
+Examples:
+
+* systemd
+* sshd
+* cron
+
+---
+
+### 5. --sort=-%cpu
+
+Sorts output by CPU usage.
+
+```text
+- = descending order
+%cpu = CPU utilization column
+```
+
+Highest CPU-consuming process appears first.
+
+---
+
+### 6. Pipe (`|`)
+
+Sends output from one command to another.
+
+---
+
+### 7. head -n 6
+
+Shows:
+
+```text
+1 Header line
+5 Process lines
+```
+
+Total: 6 lines
+
+---
+
+# System Health Monitoring Script
+
+## Requirement
+
+Create:
+
+* Hostname and OS Information
+* Uptime
+* Disk Usage
+* Memory Usage
+* Top 5 CPU-consuming Processes
+
+Use:
+
+```bash
+set -euo pipefail
+```
+
+---
+
+## Complete Script
+
+```bash
 #!/bin/bash
-
-<<todo
-A function to print hostname and OS info
-A function to print uptime
-A function to print disk usage (top 5 by size)
-A function to print memory usage
-A function to print top 5 CPU-consuming processes
-A main function that calls all of the above with section headers
-Use set -euo pipefail at the top
-todo
 
 set -euo pipefail
 
 sys_info(){
   echo "***********Hostname and OS information************"
-  echo "$(hostnamectl)"
+  hostnamectl
   echo -e "**************************************************\n"
 }
 
- 
 sys_uptime(){
   echo "***********Uptime************"
-  echo "$(uptime)"
+  uptime
   echo -e "**************************************************\n"
 }
 
-
 disk_usage(){
-
-        echo "Disk Usage for particualr directory"
-        echo "$(sudo du -h --max-depth=1 /var | sort -hr | head -5 2>/dev/null)"
+  echo "Disk Usage for particular directory"
+  sudo du -h --max-depth=1 /var 2>/dev/null | sort -hr | head -5
 }
 
 memory_usage(){
-    echo "Memory Usage"
-    echo "$(free -h)" 
+  echo "Memory Usage"
+  free -h
 }
 
 top_heavy_processes(){
-        echo "top 5 cpu consuming processes"
-        echo "$(ps aux --sort=-%cpu | head -n 6)"
+  echo "Top 5 CPU consuming processes"
+  ps aux --sort=-%cpu | head -n 6
 }
 
 main(){
-sys_info
-sys_uptime
-disk_usage
-memory_usage
-top_heavy_processes
+  sys_info
+  sys_uptime
+  disk_usage
+  memory_usage
+  top_heavy_processes
 }
 
-main 
+main
+```
 
+---
 
+# Key Learnings
 
-
-
-                                                                                                                                             
-                                                                                                                                             
-                                                                                                                                             
+1. Functions improve script reusability and organization.
+2. `set -euo pipefail` makes Bash scripts safer and easier to debug.
+3. `local` variables prevent accidental modification of global variables.
+4. System monitoring can be automated using Bash functions.
+5. Commands such as `hostnamectl`, `uptime`, `free`, `du`, and `ps` are commonly used in Linux administration and DevOps troubleshooting.
